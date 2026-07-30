@@ -151,7 +151,7 @@ export default function SeoSettingsPage() {
                           placeholder="Enter website full URL"
                         />
                         <p className="text-sm text-muted-foreground">
-                          For example: https://pintree.io
+                          For example: https://github.com/Heryf/pintree
                         </p>
                       </div>
 
