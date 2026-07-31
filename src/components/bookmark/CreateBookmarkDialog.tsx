@@ -23,6 +23,7 @@ import Link from "next/link";
 import { Switch } from "@/components/ui/switch";
 import { Check, ChevronsUpDown, Folder } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { TagInput } from "./TagInput";
 import {
   Command,
   CommandEmpty,
@@ -86,6 +87,7 @@ export function CreateBookmarkDialog({
     isFeatured: false,
     sortOrder: 0
   });
+  const [tags, setTags] = useState<string[]>([]);
 
   // 添加新的状态来跟踪是否已获取信息
   const [hasLoadedInfo, setHasLoadedInfo] = useState(false);
@@ -134,6 +136,7 @@ export function CreateBookmarkDialog({
         isFeatured: false,
         sortOrder: 0
       });
+      setTags([]);
     }
   }, [open, defaultCollectionId, defaultFolderId]);
 
@@ -148,6 +151,7 @@ export function CreateBookmarkDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          tags,
           folderId: formData.folderId === "none" ? null : formData.folderId
         }),
       });
@@ -174,6 +178,7 @@ export function CreateBookmarkDialog({
         isFeatured: false,
         sortOrder: 0
       });
+      setTags([]);
     } catch (error) {
       console.error("Create bookmark failed:", error);
       setError("Create bookmark failed, please try again");
@@ -416,7 +421,7 @@ export function CreateBookmarkDialog({
             </>
           )}
 
-          {/* <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <Switch
               checked={formData.isFeatured}
               onCheckedChange={(checked) =>
@@ -424,7 +429,11 @@ export function CreateBookmarkDialog({
               }
             />
             <Label>Featured</Label>
-          </div> */}
+          </div>
+
+          {hasLoadedInfo && (
+            <TagInput value={tags} onChange={setTags} />
+          )}
 
           <div className="flex justify-end gap-2">
             <Button

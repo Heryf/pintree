@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { BookmarkCard } from "./BookmarkCard";
 import { FolderCard } from "./FolderCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SearchBar } from "@/components/search/SearchBar";
@@ -36,6 +36,7 @@ interface Bookmark {
   description?: string;
   icon?: string;
   isFeatured: boolean;
+  tags?: { name: string }[];
   collection?: { name: string; slug: string; };
   folder?: { name: string; slug: string; };
 }
@@ -73,6 +74,7 @@ interface BookmarkItem {
   description?: string;
   icon?: string;
   isFeatured: boolean;
+  tags?: { name: string }[];
 }
 
 export function BookmarkGrid({ 
@@ -101,6 +103,7 @@ export function BookmarkGrid({
   const [totalResults, setTotalResults] = useState(0);
   const [currentEngine, setCurrentEngine] = useState("Bookmarks");
   const [enableSearch, setEnableSearch] = useState(true);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const routeToFolderInCollection = (collectionSlug: string, folderId?: string) => {
     const currentSearchParams = new URLSearchParams(searchParams.toString());
@@ -305,6 +308,28 @@ export function BookmarkGrid({
         </div>
       )}
 
+      {/* 视图切换按钮 */}
+      {!inputValue && (
+        <div className="flex justify-end gap-1">
+          <Button
+            variant={viewMode === 'grid' ? 'default' : 'outline'}
+            size="icon"
+            onClick={() => setViewMode('grid')}
+            aria-label="Grid view"
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === 'list' ? 'default' : 'outline'}
+            size="icon"
+            onClick={() => setViewMode('list')}
+            aria-label="List view"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
       {/* 面包屑导航 - 仅在非根目录且非搜索状态时显示 */}
       {currentFolderId && !searchResults.length && !inputValue && (
         <nav className="flex mb-4 items-center space-x-1">
@@ -357,7 +382,7 @@ export function BookmarkGrid({
           {searchResults.length > 0 ? (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Search results ({totalResults})</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+              <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"}>
                 {searchResults.map((bookmark) => (
                   <BookmarkCard
                     key={bookmark.id}
@@ -366,6 +391,8 @@ export function BookmarkGrid({
                     description={bookmark.description}
                     icon={bookmark.icon}
                     isFeatured={bookmark.isFeatured}
+                    tags={bookmark.tags}
+                    compact={viewMode === 'list'}
                   />
                 ))}
               </div>
@@ -386,7 +413,7 @@ export function BookmarkGrid({
                       {currentFolderId ? breadcrumbs[breadcrumbs.length - 1]?.name : collectionName}
                     </h2>
                   )}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                  <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"}>
                     {currentBookmarks.map((bookmark) => (
                       <BookmarkCard
                         key={bookmark.id}
@@ -395,6 +422,8 @@ export function BookmarkGrid({
                         description={bookmark.description}
                         icon={bookmark.icon}
                         isFeatured={bookmark.isFeatured}
+                        tags={bookmark.tags}
+                        compact={viewMode === 'list'}
                       />
                     ))}
                   </div>
@@ -421,7 +450,7 @@ export function BookmarkGrid({
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                  <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"}>
                     {subfolder.items.slice(0, 50).map((item) => (
                       item.type === 'folder' ? (
                         <FolderCard
@@ -438,6 +467,8 @@ export function BookmarkGrid({
                           description={item.description}
                           icon={item.icon}
                           isFeatured={item.isFeatured}
+                          tags={item.tags}
+                          compact={viewMode === 'list'}
                         />
                       )
                     ))}

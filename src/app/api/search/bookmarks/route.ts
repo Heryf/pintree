@@ -82,7 +82,8 @@ export async function GET(request: Request) {
             select: {
               name: true
             }
-          }
+          },
+          tags: true
         },
         orderBy: {
           updatedAt: 'desc'

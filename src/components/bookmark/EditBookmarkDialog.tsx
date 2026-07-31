@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { TagInput } from "./TagInput";
 
 interface Collection {
   id: string;
@@ -34,6 +35,7 @@ interface EditBookmarkDialogProps {
     isFeatured: boolean;
     collectionId: string;
     icon?: string;
+    tags?: { name: string }[];
   };
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -65,6 +67,9 @@ export function EditBookmarkDialog({
     isFeatured: bookmark.isFeatured,
     icon: bookmark.icon || "",
   });
+  const [tags, setTags] = useState<string[]>(
+    bookmark.tags?.map((t) => t.name) || []
+  );
   const [availableIcons, setAvailableIcons] = useState<string[]>([]);
 
   useEffect(() => {
@@ -97,6 +102,7 @@ export function EditBookmarkDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          tags,
           icon: formData.icon || null,
           description: formData.description || null,
         }),
@@ -305,6 +311,18 @@ export function EditBookmarkDialog({
               </div>
             )}
           </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={formData.isFeatured}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, isFeatured: checked }))
+              }
+            />
+            <Label>Featured</Label>
+          </div>
+
+          <TagInput value={tags} onChange={setTags} />
 
           <div className="flex justify-end gap-2">
             <Button

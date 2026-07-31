@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useTheme } from "next-themes";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Plus, Settings } from "lucide-react";
+import { Plus, Settings, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import CreateBookmarkDialogGlobal from "@/components/bookmark/CreateBookmarkDialogGlobal";
@@ -36,7 +37,13 @@ export function Header({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
+  const { theme, setTheme } = useTheme();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSuccess = async (newBookmarkFolderId?: string) => {
     setDialogOpen(false);
@@ -78,6 +85,17 @@ export function Header({
               New Bookmark
             </Button>
           </>
+        )}
+        {mounted && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-label="Toggle theme"
+          >
+            <Sun className="h-4 w-4 dark:hidden" />
+            <Moon className="h-4 w-4 hidden dark:block" />
+          </Button>
         )}
         <Button asChild variant="outline" size="sm">
           <Link href="/admin/collections" aria-label="Admin">

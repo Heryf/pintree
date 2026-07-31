@@ -1,6 +1,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { SessionProvider } from "@/components/providers/SessionProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { Analytics } from "@/components/analytics/Analytics";
@@ -171,7 +172,9 @@ export default async function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <SessionProvider>{children}</SessionProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          <SessionProvider>{children}</SessionProvider>
+        </ThemeProvider>
         <Toaster />
         <SonnerToaster />
       </body>

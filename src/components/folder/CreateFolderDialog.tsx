@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface Folder {
   id: string;
@@ -79,20 +80,27 @@ export function CreateFolderDialog({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create");
+        const errorData = await response.json().catch(() => ({}));
+        const message =
+          errorData?.error || `Failed to create folder (HTTP ${response.status})`;
+        throw new Error(message);
       }
 
+      toast.success("Folder created successfully");
       onOpenChange(false);
       onSuccess?.();
-      
+
       setFormData({
         name: "",
         isPublic: true,
         password: "",
-        parentId: currentFolderId || "",
+        parentId: currentFolderId || "root",
       });
     } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to create folder";
       console.error("Failed to create folder:", error);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
