@@ -1,27 +1,35 @@
 "use client";
 
+import { Folder } from "lucide-react";
+
 interface FolderCardProps {
   name: string;
   icon?: string;
   onClick: () => void;
+  bookmarkCount?: number;
 }
 
-export function FolderCard({ name, icon, onClick }: FolderCardProps) {
+export function FolderCard({ name, icon, onClick, bookmarkCount }: FolderCardProps) {
   return (
     <button
       onClick={onClick}
-      className="p-4 bg-muted/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:bg-muted dark:hover:bg-gray-800 transition-colors w-full"
+      className="group relative flex flex-col items-center justify-center p-6 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/30 dark:to-emerald-900/20 hover:from-emerald-100 hover:to-emerald-200/50 dark:hover:from-emerald-900/40 dark:hover:to-emerald-800/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 w-full aspect-square"
     >
-      <div className="flex flex-row items-center gap-4">
-        {icon ? (
-          <img src={icon} alt={name} className="w-12 h-12" />
-        ) : (
-          <svg className="w-12 h-12 text-emerald-500" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-          </svg>
-        )}
-        <span className="text-sm truncate">{name}</span>
-      </div>
+      {icon ? (
+        <img src={icon} alt={name} className="w-14 h-14 mb-4 object-contain" />
+      ) : (
+        <div className="w-14 h-14 mb-4 rounded-2xl bg-emerald-500/20 dark:bg-emerald-500/10 flex items-center justify-center">
+          <Folder className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+        </div>
+      )}
+      <span className="text-sm font-medium text-emerald-900 dark:text-emerald-100 truncate w-full text-center">
+        {name}
+      </span>
+      {typeof bookmarkCount === "number" && (
+        <span className="mt-2 text-xs text-emerald-600/70 dark:text-emerald-400/70">
+          {bookmarkCount} 个书签
+        </span>
+      )}
     </button>
   );
 }

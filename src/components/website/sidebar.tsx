@@ -10,18 +10,25 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { ChevronRight, Folder, FolderOpen } from "lucide-react";
+import { ChevronRight, Folder, FolderOpen, Home, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSettingImages } from "@/hooks/useSettingImages";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 interface Collection {
   id: string;
   name: string;
   isPublic: boolean;
-  slug: string;
+  slug: string | null;
 }
 
 interface FolderNode {
@@ -37,6 +44,7 @@ interface WebsiteSidebarProps {
   onCollectionChange?: (collectionId: string) => void;
   selectedCollectionId: string;
   currentFolderId: string | null;
+  collections?: Collection[];
 }
 
 export function WebsiteSidebar({
@@ -44,11 +52,11 @@ export function WebsiteSidebar({
   onCollectionChange,
   selectedCollectionId,
   currentFolderId,
+  collections = [],
 }: WebsiteSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [collections, setCollections] = useState<Collection[]>([]);
   const [folderTree, setFolderTree] = useState<FolderNode[]>([]);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set()
@@ -58,39 +66,10 @@ export function WebsiteSidebar({
 
   const { images, isLoading, error } = useSettingImages("logoUrl");
 
-  // 获取书签集合列表
+  // 使用父组件传入的合集列表
   useEffect(() => {
-    const fetchCollections = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/collections?publicOnly=true");
-        const data = await response.json();
-
-        if (!Array.isArray(data)) {
-          console.error("API returned data format is incorrect");
-          setCollections([]);
-          return;
-        }
-
-        const publicCollections = data;
-        setCollections(publicCollections);
-
-        // 如果有公开的书签集合且没有选中的集合，选择第一个
-        if (publicCollections.length > 0 && !selectedCollectionId) {
-          const firstCollection = publicCollections[0];
-          if (onCollectionChange) {
-            onCollectionChange(firstCollection.id);
-          }
-        }
-      } catch (error) {
-        console.error("Get bookmark collection failed:", error);
-        setCollections([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCollections();
-  }, []);
+    setLoading(false);
+  }, [collections]);
 
   // 获取文件夹树
   useEffect(() => {
@@ -383,6 +362,48 @@ export function WebsiteSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
+      {/* 合集选择与返回首页 */}
+      <div className="px-3 py-3 space-y-2 border-b border-gray-200 dark:border-gray-800">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-2"
+        >
+          <Home className="h-4 w-4" />
+          返回合集列表
+        </Link>
+        {collections.length > 1 && (
+          <Select
+            value={selectedCollectionId}
+            onValueChange={(value) => {
+              if (onCollectionChange) {
+                onCollectionChange(value);
+              }
+            }}
+          >
+            <SelectTrigger className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <SelectValue placeholder="选择书签合集" />
+            </SelectTrigger>
+            <SelectContent>
+              {collections.map((collection) => (
+                <SelectItem key={collection.id} value={collection.id}>
+                  <div className="flex items-center gap-2">
+                    <Folder className="h-3.5 w-3.5 text-emerald-500" />
+                    {collection.name}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        {collections.length <= 1 && selectedCollectionId && (
+          <div className="flex items-center gap-2 px-2 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+            <Folder className="h-4 w-4" />
+            {collections.find((c) => c.id === selectedCollectionId)?.name || "当前合集"}
+          </div>
+        )}
+      </div>
+
       <SidebarContent className="flex-1 min-h-0 overflow-y-auto hide-scrollbar">
         <SidebarGroup>
           <SidebarMenu>

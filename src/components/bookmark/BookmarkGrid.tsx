@@ -404,15 +404,32 @@ export function BookmarkGrid({
           ) : (
             // 原有的文件夹和书签显示逻辑，非搜索状态
             <>
-              {/* 当前文件夹的书签，书签展示在文件夹前面 */}
+              {/* 当前文件夹的子文件夹，以绿色卡片网格展示在上方 */}
+              {subfolders?.length > 0 && (
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">
+                    {currentFolderId ? "子文件夹" : collectionName}
+                  </h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    {subfolders.map((subfolder) => (
+                      <FolderCard
+                        key={subfolder.id}
+                        name={subfolder.name}
+                        icon={subfolder.icon}
+                        bookmarkCount={subfolder.bookmarkCount}
+                        onClick={() => handleFolderNavigation(subfolder.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 当前文件夹的书签，展示在子文件夹下方 */}
               {currentBookmarks?.length > 0 && (
                 <div className="space-y-4">
-                  {/* 只在有子文件夹时显示标题 */}
-                  {subfolders?.length > 0 && (
-                    <h2 className="text-xl font-semibold">
-                      {currentFolderId ? breadcrumbs[breadcrumbs.length - 1]?.name : collectionName}
-                    </h2>
-                  )}
+                  <h2 className="text-xl font-semibold">
+                    {currentFolderId ? breadcrumbs[breadcrumbs.length - 1]?.name : `${collectionName} 书签`}
+                  </h2>
                   <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"}>
                     {currentBookmarks.map((bookmark) => (
                       <BookmarkCard
@@ -429,52 +446,6 @@ export function BookmarkGrid({
                   </div>
                 </div>
               )}
-
-              {/* 子文件夹及其内容 */}
-              {subfolders?.map((subfolder) => (
-                <div key={subfolder.id} className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">
-                      {subfolder.name}
-                    </h3>
-                    {/* 当文件夹内的项目总数大于显示的书签数时显示 View all 按钮 */}
-                    {subfolder.items.length > 50 && (
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleFolderNavigation(subfolder.id)}
-                        className="text-green-600 hover:text-green-600"
-                      >
-                        查看全部
-                        <ChevronRight className="ml-1 h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"}>
-                    {subfolder.items.slice(0, 50).map((item) => (
-                      item.type === 'folder' ? (
-                        <FolderCard
-                          key={item.id}
-                          name={item.name}
-                          icon={item.icon}
-                          onClick={() => handleFolderNavigation(item.id)}
-                        />
-                      ) : (
-                        <BookmarkCard
-                          key={item.id}
-                          title={item.title}
-                          url={item.url}
-                          description={item.description}
-                          icon={item.icon}
-                          isFeatured={item.isFeatured}
-                          tags={item.tags}
-                          compact={viewMode === 'list'}
-                        />
-                      )
-                    ))}
-                  </div>
-                </div>
-              ))}
             </>
           )}
         </div>

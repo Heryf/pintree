@@ -12,6 +12,7 @@ import { TopBanner } from "@/components/website/top-banner";
 
 import { GetStarted } from "@/components/website/get-started";
 import { BackToTop } from "@/components/website/back-to-top";
+import { CollectionGrid } from "@/components/collection/CollectionGrid";
 
 import { Collection } from "@prisma/client";
 
@@ -56,9 +57,9 @@ function SearchParamsComponent() {
             setCollectionName(currentCollection.name);
           }
         } else {
-          const defaultCollection = data[0];
-          setSelectedCollectionId(defaultCollection?.id ?? "");
-          setCollectionName(defaultCollection?.name ?? "");
+          // 没有指定合集时，不自动选择，展示合集列表
+          setSelectedCollectionId("");
+          setCollectionName("");
         }
       } catch (error) {
         console.error("获取 collections 失败:", error);
@@ -115,6 +116,7 @@ function SearchParamsComponent() {
           selectedCollectionId || collectionSlug ? (
             <>
               <WebsiteSidebar
+                collections={collections}
                 selectedCollectionId={selectedCollectionId}
                 currentFolderId={currentFolderId}
                 onCollectionChange={handleCollectionChange}
@@ -143,6 +145,17 @@ function SearchParamsComponent() {
               </div>
               <BackToTop />
             </>
+          ) : collections.length > 0 ? (
+            <div className="flex flex-1 flex-col">
+              <Header />
+              <div className="flex-1 overflow-y-auto">
+                <CollectionGrid
+                  collections={collections}
+                  onSelect={(collection) => handleCollectionChange(collection.id)}
+                />
+              </div>
+              <Footer />
+            </div>
           ) : (
             <div className="flex flex-1">
               <GetStarted />
