@@ -156,7 +156,7 @@ function SearchParamsComponent() {
 
 export default function Page() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>加载中...</div>}>
       <SearchParamsComponent />
     </Suspense>
   );

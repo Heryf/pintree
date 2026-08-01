@@ -64,8 +64,8 @@ export function CreateCollectionDialog({
         // 显示错误提示
         toast({
           variant: "destructive",
-          title: "Create Failed",
-          description: data.error || "Create collection failed"
+          title: "创建失败",
+          description: data.error || "创建书签合集失败"
         });
         return; // 直接返回，不关闭对话框
       }
@@ -85,8 +85,8 @@ export function CreateCollectionDialog({
 
       // 成功提示
       toast({
-        title: "Create Success",
-        description: "Bookmark collection created",
+        title: "创建成功",
+        description: "书签合集已创建",
       });
 
       if (onSuccess) {
@@ -97,8 +97,8 @@ export function CreateCollectionDialog({
       // 错误提示
       toast({
         variant: "destructive",
-        title: "Create Failed",
-        description: error instanceof Error ? error.message : "An error occurred while creating the bookmark collection"
+        title: "创建失败",
+        description: error instanceof Error ? error.message : "创建书签合集时发生错误"
       });
     } finally {
       setLoading(false);
@@ -109,16 +109,16 @@ export function CreateCollectionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Bookmark Collection</DialogTitle>
+          <DialogTitle>创建书签合集</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Name</Label>
+            <Label>名称</Label>
             <Input
               value={formData.name}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Enter collection name"
+              placeholder="输入合集名称"
               disabled={loading}
             />
           </div>
@@ -158,17 +158,17 @@ export function CreateCollectionDialog({
             </Select>
           </div> */}
           <div className="space-y-2">
-            <Label>Description</Label>
+            <Label>描述</Label>
             <Textarea
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Enter collection description"
+              placeholder="输入合集描述"
               disabled={loading}
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <Label>Public Access</Label>
+            <Label>公开访问</Label>
             <Switch
               checked={formData.isPublic}
               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isPublic: checked }))}
@@ -183,10 +183,10 @@ export function CreateCollectionDialog({
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              Cancel
+              取消
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create"}
+              {loading ? "创建中..." : "创建"}
             </Button>
           </div>
         </form>

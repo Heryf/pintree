@@ -83,14 +83,14 @@ export function CollectionCard({ collection, onUpdate }: CollectionCardProps) {
       document.body.removeChild(a);
 
       toast({
-        title: "Export Success",
-        description: "Your bookmark collection has been exported successfully",
+        title: "导出成功",
+        description: "书签合集已成功导出",
       });
     } catch (error) {
       console.error('Export failed:', error);
       toast({
-        title: "Export failed",
-        description: "Please try again later",
+        title: "导出失败",
+        description: "请稍后重试",
         variant: "destructive",
       });
     }
@@ -123,18 +123,18 @@ export function CollectionCard({ collection, onUpdate }: CollectionCardProps) {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
                       <Edit className="w-4 h-4 mr-2" />
-                      Edit
+                      编辑
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleExport}>
                       <Download className="w-4 h-4 mr-2" />
-                      Export
+                      导出
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-red-600"
                       onClick={() => setIsDeleteDialogOpen(true)}
                     >
                       <Trash className="w-4 h-4 mr-2" />
-                      Delete
+                      删除
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -149,10 +149,10 @@ export function CollectionCard({ collection, onUpdate }: CollectionCardProps) {
                       : "bg-orange-100 text-gray-800"
                   )}
                 >
-                  {collection.isPublic ? "Public" : "Private"}
+                  {collection.isPublic ? "公开" : "私有"}
                 </span>
                 <span className="text-sm text-muted-foreground">
-                  {collection.totalBookmarks} Bookmarks
+                  {collection.totalBookmarks} 个书签
                 </span>
               </div>
             </div>
@@ -170,9 +170,9 @@ export function CollectionCard({ collection, onUpdate }: CollectionCardProps) {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Bookmark Collection</DialogTitle>
+            <DialogTitle>删除书签合集</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the "{collection.name}" bookmark collection? This action cannot be undone.
+              确定要删除「{collection.name}」书签合集吗？此操作无法撤销。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -180,7 +180,7 @@ export function CollectionCard({ collection, onUpdate }: CollectionCardProps) {
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
             >
-              Cancel
+              取消
             </Button>
             <Button
               variant="destructive"
@@ -189,7 +189,7 @@ export function CollectionCard({ collection, onUpdate }: CollectionCardProps) {
                 setIsDeleteDialogOpen(false);
               }}
             >
-              Delete
+              删除
             </Button>
           </DialogFooter>
         </DialogContent>

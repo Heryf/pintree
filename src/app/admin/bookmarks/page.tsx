@@ -207,7 +207,7 @@ export default function BookmarksPage() {
       setBookmarks(bookmarksData);
       setFolders(foldersData);
     } catch (error) {
-      setError("Failed to navigate to folder");
+      setError("导航到文件夹失败");
       console.error(error);
     } finally {
       setIsNavigating(false);
@@ -258,7 +258,7 @@ export default function BookmarksPage() {
       setBookmarks(bookmarksData);
       setFolders(foldersData);
     } catch (error) {
-      setError("Navigate folder failed");
+      setError("导航文件夹失败");
       console.error(error);
     } finally {
       setIsNavigating(false);
@@ -333,7 +333,7 @@ export default function BookmarksPage() {
   return (
     <div className="flex-1 flex flex-col">
       <AdminHeader 
-        title="Bookmarks"
+        title="书签管理"
         action={
           <Select
             value={selectedCollectionId}
@@ -347,7 +347,7 @@ export default function BookmarksPage() {
             }}
           >
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select a collection" />
+              <SelectValue placeholder="选择合集" />
             </SelectTrigger>
             <SelectContent>
               {collections?.map((collection) => (
@@ -366,7 +366,7 @@ export default function BookmarksPage() {
             variant="outline"
           >
             <FolderPlus className="w-4 h-4 mr-2" />
-            New Folder
+            新建文件夹
           </Button>
           
           <Button 
@@ -374,7 +374,7 @@ export default function BookmarksPage() {
             disabled={!selectedCollectionId || loading}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add Bookmark
+            添加书签
           </Button>
         </div>
       </AdminHeader>
@@ -399,13 +399,13 @@ export default function BookmarksPage() {
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
-              <h3 className="mt-4 text-lg font-semibold">No bookmark collections</h3>
+              <h3 className="mt-4 text-lg font-semibold">暂无书签合集</h3>
               <p className="mb-4 mt-2 text-sm text-muted-foreground">
-                Please create a bookmark collection first, then add bookmarks.
+                请先创建一个书签合集，然后再添加书签。
               </p>
               <Button asChild>
                 <Link href="/admin/collections">
-                  Create Collection
+                  创建合集
                 </Link>
               </Button>
             </div>
@@ -421,7 +421,7 @@ export default function BookmarksPage() {
                 className={!currentFolderId ? "bg-white" : ""}
                 disabled={isNavigating}
               >
-                Root
+                根目录
               </Button>
               {folderPath.map((folder, index) => (
                 <Fragment key={folder.id}>
@@ -457,18 +457,18 @@ export default function BookmarksPage() {
                     <line x1="12" y1="8" x2="12" y2="12" />
                     <line x1="12" y1="16" x2="12.01" y2="16" />
                   </svg>
-                  <h3 className="mt-4 text-lg font-semibold">No Content</h3>
+                  <h3 className="mt-4 text-lg font-semibold">暂无内容</h3>
                   <p className="mb-4 mt-2 text-sm text-muted-foreground">
-                    There is no content in the current folder. Start adding your first bookmark or folder.
+                    当前文件夹暂无内容，开始添加你的第一个书签或文件夹吧。
                   </p>
                   <div className="flex gap-2">
                     <Button onClick={() => setIsCreateDialogOpen(true)}>
                       <Plus className="mr-2 h-4 w-4" />
-                      Add Bookmark
+                      添加书签
                     </Button>
                     <Button variant="outline" onClick={() => setIsCreateFolderDialogOpen(true)}>
                       <FolderPlus className="mr-2 h-4 w-4" />
-                      New Folder
+                      新建文件夹
                     </Button>
                   </div>
                 </div>

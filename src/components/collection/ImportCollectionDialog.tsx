@@ -62,8 +62,8 @@ export function ImportCollectionDialog({
       ) {
         toast({
           variant: "destructive",
-          title: "File Too Large",
-          description: "Please select a JSON file smaller than 5MB",
+          title: "文件过大",
+          description: "请选择小于 5MB 的 JSON 文件",
         });
       }
     },
@@ -74,8 +74,8 @@ export function ImportCollectionDialog({
     if (!formData.file || !formData.name) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Please select a file and enter a collection name",
+        title: "错误",
+        description: "请选择文件并输入合集名称",
       });
       return;
     }
@@ -129,8 +129,8 @@ export function ImportCollectionDialog({
             if (!folderResponse.ok) {
               toast({
                 variant: "destructive",
-                title: "Folder Import Failed",
-                description: folderData.error || "An error occurred while importing folders",
+                title: "文件夹导入失败",
+                description: folderData.error || "导入文件夹时发生错误",
               });
               return;
             }
@@ -143,8 +143,8 @@ export function ImportCollectionDialog({
 
             // Show folder import progress
             toast({
-              title: "Folder Import Progress",
-              description: `Importing folders at level ${level}: Batch ${folderBatches.indexOf(folderBatch) + 1}/${folderBatches.length}`,
+              title: "文件夹导入进度",
+              description: `正在导入第 ${level} 层文件夹：第 ${folderBatches.indexOf(folderBatch) + 1}/${folderBatches.length} 批`,
             });
           }
         }
@@ -178,17 +178,17 @@ export function ImportCollectionDialog({
           if (!response.ok) {
             toast({
               variant: "destructive",
-              title: "Bookmark Import Failed",
-              description: data.message || "Failed to import bookmark collection",
+              title: "书签导入失败",
+              description: data.message || "导入书签合集失败",
             });
             return;
           }
       
           // Show import progress
           toast({
-            title: "Bookmark Import Progress",
-            description: `Imported ${Math.min(i + batchSize, totalBookmarks)}/${totalBookmarks} bookmarks 
-              (${batchDuration.toFixed(2)}s, estimated remaining ${estimatedRemainingTime.toFixed(2)}s)`,
+            title: "书签导入进度",
+            description: `已导入 ${Math.min(i + batchSize, totalBookmarks)}/${totalBookmarks} 个书签
+             （${batchDuration.toFixed(2)}秒，预计剩余 ${estimatedRemainingTime.toFixed(2)}秒）`,
           });
         } 
 
@@ -233,20 +233,20 @@ export function ImportCollectionDialog({
 
           // Show import progress toast with batch time and estimated remaining time
           toast({
-            title: "Import Progress",
-            description: `Batch ${
+            title: "导入进度",
+            description: `第 ${
               Math.floor(i / batchSize) + 1
-            } imported (${batchDuration.toFixed(2)}s). 
-          Estimated remaining time: ${estimatedRemainingTime.toFixed(
+            } 批已导入（${batchDuration.toFixed(2)}秒）。
+          预计剩余时间：${estimatedRemainingTime.toFixed(
             2
-          )}s (${remainingBatches} batches)`,
+          )}秒（剩余 ${remainingBatches} 批）`,
           });
 
           if (!response.ok) {
             toast({
               variant: "destructive",
-              title: "Import Failed",
-              description: data.message || "Failed to import collection",
+              title: "导入失败",
+              description: data.message || "导入合集失败",
             });
             return;
           }
@@ -276,10 +276,10 @@ export function ImportCollectionDialog({
       });
 
       toast({
-        title: "Import Successful",
-        description: `Collection "${
+        title: "导入成功",
+        description: `合集"${
           formData.name
-        }" imported successfully in ${totalImportTime.toFixed(2)}s`,
+        }"已成功导入，耗时 ${totalImportTime.toFixed(2)}秒`,
       });
 
       if (onSuccess) {
@@ -289,11 +289,11 @@ export function ImportCollectionDialog({
       console.error("Failed to import bookmark collection:", error);
       toast({
         variant: "destructive",
-        title: "Import Failed",
+        title: "导入失败",
         description:
           error instanceof Error
             ? error.message
-            : "An error occurred while importing the bookmark collection",
+            : "导入书签合集时发生错误",
       });
     } finally {
       setLoading(false);
@@ -304,25 +304,25 @@ export function ImportCollectionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Import Bookmark Collection</DialogTitle>
+          <DialogTitle>导入书签合集</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Collection Name</Label>
+            <Label htmlFor="name">合集名称</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, name: e.target.value }))
               }
-              placeholder="Enter collection name"
+              placeholder="输入合集名称"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">描述</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -332,7 +332,7 @@ export function ImportCollectionDialog({
                   description: e.target.value.slice(0, 140),
                 }))
               }
-              placeholder="Enter collection description"
+              placeholder="输入合集描述"
               rows={3}
               className="resize-none"
               maxLength={140}
@@ -340,7 +340,7 @@ export function ImportCollectionDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="file">Select JSON File (Max 5MB)</Label>
+            <Label htmlFor="file">选择 JSON 文件（最大 5MB）</Label>
             <div
               {...getRootProps()}
               className={`
@@ -363,9 +363,8 @@ export function ImportCollectionDialog({
                     </span>
                   ) : (
                     <>
-                      <span className="font-medium">Click to upload</span> or
-                      drag and drop file here
-                      <p className="text-xs">Supports JSON files</p>
+                      <span className="font-medium">点击上传</span> 或拖拽文件到此处
+                      <p className="text-xs">支持 JSON 格式文件</p>
                     </>
                   )}
                 </div>
@@ -379,10 +378,10 @@ export function ImportCollectionDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              取消
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Importing..." : "Import"}
+              {loading ? "导入中..." : "导入"}
             </Button>
           </div>
         </form>

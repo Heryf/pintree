@@ -167,7 +167,7 @@ export function BookmarkDataTable({
   if (tableData.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">No items found</p>
+        <p className="text-gray-500">暂无数据</p>
       </div>
     );
   }
@@ -178,11 +178,11 @@ export function BookmarkDataTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Icon</TableHead>
-              <TableHead>Icon URL</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>View Count</TableHead>
+              <TableHead>标题</TableHead>
+              <TableHead>图标</TableHead>
+              <TableHead>图标链接</TableHead>
+              <TableHead>描述</TableHead>
+              <TableHead>浏览量</TableHead>
               <TableHead>
                 <Button
                   variant="ghost"
@@ -192,7 +192,7 @@ export function BookmarkDataTable({
                     onSortChange("createdAt", newOrder);
                   }}
                 >
-                  Created At
+                  创建时间
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
@@ -205,11 +205,11 @@ export function BookmarkDataTable({
                     onSortChange("updatedAt", newOrder);
                   }}
                 >
-                  Updated At
+                  更新时间
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -304,7 +304,7 @@ function TableActions({ item, onUpdate }: { item: TableItem; onUpdate: () => voi
       setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error("Delete failed:", error);
-      alert(`Delete failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(`删除失败：${error instanceof Error ? error.message : '未知错误'}`);
     }
   };
 
@@ -318,13 +318,13 @@ function TableActions({ item, onUpdate }: { item: TableItem; onUpdate: () => voi
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
-            Edit
+            编辑
           </DropdownMenuItem>
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={() => setIsDeleteDialogOpen(true)}
             className="text-red-600"
           >
-            Delete
+            删除
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -351,9 +351,9 @@ function TableActions({ item, onUpdate }: { item: TableItem; onUpdate: () => voi
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete {item.type === "folder" ? "folder" : "bookmark"}</DialogTitle>
+            <DialogTitle>删除{item.type === "folder" ? "文件夹" : "书签"}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{item.title}" this {item.type === "folder" ? "folder" : "bookmark"}? This action cannot be undone.
+              确定要删除"{item.title}"这个{item.type === "folder" ? "文件夹" : "书签"}吗？此操作无法撤销。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -361,13 +361,13 @@ function TableActions({ item, onUpdate }: { item: TableItem; onUpdate: () => voi
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
             >
-              Cancel
+              取消
             </Button>
             <Button
               variant="destructive"
               onClick={handleDelete}
             >
-              Delete
+              删除
             </Button>
           </DialogFooter>
         </DialogContent>

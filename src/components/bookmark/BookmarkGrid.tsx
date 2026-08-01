@@ -298,7 +298,7 @@ export function BookmarkGrid({
       {enableSearch && (
         <div className="flex justify-center mt-4 mb-12">
           <SearchBar
-            placeholder="Search bookmarks..."
+            placeholder="搜索书签..."
             onSearch={performBookmarkSearch}
             currentEngine={currentEngine}
             onEngineChange={setCurrentEngine}
@@ -315,7 +315,7 @@ export function BookmarkGrid({
             variant={viewMode === 'grid' ? 'default' : 'outline'}
             size="icon"
             onClick={() => setViewMode('grid')}
-            aria-label="Grid view"
+            aria-label="网格视图"
           >
             <LayoutGrid className="h-4 w-4" />
           </Button>
@@ -323,7 +323,7 @@ export function BookmarkGrid({
             variant={viewMode === 'list' ? 'default' : 'outline'}
             size="icon"
             onClick={() => setViewMode('list')}
-            aria-label="List view"
+            aria-label="列表视图"
           >
             <List className="h-4 w-4" />
           </Button>
@@ -381,7 +381,7 @@ export function BookmarkGrid({
           {/* 搜索结果显示 */}
           {searchResults.length > 0 ? (
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Search results ({totalResults})</h2>
+              <h2 className="text-xl font-semibold">搜索结果（{totalResults}）</h2>
               <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"}>
                 {searchResults.map((bookmark) => (
                   <BookmarkCard
@@ -399,7 +399,7 @@ export function BookmarkGrid({
             </div>
           ) : inputValue ? (
             <div className="text-center text-gray-500 py-12">
-              No related results found
+              未找到相关结果
             </div>
           ) : (
             // 原有的文件夹和书签显示逻辑，非搜索状态
@@ -444,7 +444,7 @@ export function BookmarkGrid({
                         onClick={() => handleFolderNavigation(subfolder.id)}
                         className="text-green-600 hover:text-green-600"
                       >
-                        View all
+                        查看全部
                         <ChevronRight className="ml-1 h-4 w-4" />
                       </Button>
                     )}
@@ -488,17 +488,17 @@ export function BookmarkGrid({
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            Previous
+            上一页
           </Button>
           <span className="mx-4">
-            Page {currentPage} of {totalPages}
+            第 {currentPage} 页，共 {totalPages} 页
           </span>
           <Button
             variant="outline"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            Next
+            下一页
           </Button>
         </div>
       )}

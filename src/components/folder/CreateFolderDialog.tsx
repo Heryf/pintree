@@ -86,7 +86,7 @@ export function CreateFolderDialog({
         throw new Error(message);
       }
 
-      toast.success("Folder created successfully");
+      toast.success("文件夹创建成功");
       onOpenChange(false);
       onSuccess?.();
 
@@ -98,7 +98,7 @@ export function CreateFolderDialog({
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to create folder";
+        error instanceof Error ? error.message : "创建文件夹失败";
       console.error("Failed to create folder:", error);
       toast.error(message);
     } finally {
@@ -110,12 +110,12 @@ export function CreateFolderDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New Folder</DialogTitle>
+          <DialogTitle>新建文件夹</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Name</Label>
+            <Label>名称</Label>
             <Input
               value={formData.name}
               onChange={(e) =>
@@ -126,7 +126,7 @@ export function CreateFolderDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Parent Folder</Label>
+            <Label>父文件夹</Label>
             <Select
               value={formData.parentId}
               onValueChange={(value) =>
@@ -134,10 +134,10 @@ export function CreateFolderDialog({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select Parent Folder" />
+                <SelectValue placeholder="选择父文件夹" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="root">Root</SelectItem>
+                <SelectItem value="root">根目录</SelectItem>
                 {folders.map((folder) => (
                   <SelectItem key={folder.id} value={folder.id}>
                     {folder.name}
@@ -178,10 +178,10 @@ export function CreateFolderDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              取消
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create"}
+              {loading ? "创建中..." : "创建"}
             </Button>
           </div>
         </form>

@@ -82,7 +82,7 @@ export function Header({
               onClick={() => setDialogOpen(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
-              New Bookmark
+              新建书签
             </Button>
           </>
         )}
@@ -91,14 +91,14 @@ export function Header({
             variant="outline"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            aria-label="Toggle theme"
+            aria-label="切换主题"
           >
             <Sun className="h-4 w-4 dark:hidden" />
             <Moon className="h-4 w-4 hidden dark:block" />
           </Button>
         )}
-        <Button asChild variant="outline" size="sm">
-          <Link href="/admin/collections" aria-label="Admin">
+          <Button asChild variant="outline" size="sm">
+          <Link href="/admin/collections" aria-label="管理后台">
             <Settings className="h-4 w-4" />
           </Link>
         </Button>

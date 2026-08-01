@@ -126,7 +126,7 @@ export function EditBookmarkDialog({
       onSuccess?.();
     } catch (error) {
       console.error("Update bookmark failed:", error);
-      setError(error instanceof Error ? error.message : "Update bookmark failed");
+      setError(error instanceof Error ? error.message : "更新书签失败");
     } finally {
       setLoading(false);
     }
@@ -143,12 +143,12 @@ export function EditBookmarkDialog({
 
   const handleGetInfo = async () => {
     if (!formData.url) {
-      setError("Please enter a URL");
+      setError("请输入链接地址");
       return;
     }
 
     if (!isValidUrl(formData.url)) {
-      setError("Please enter a valid URL, e.g. https://example.com");
+      setError("请输入有效的链接地址，例如 https://example.com");
       return;
     }
 
@@ -159,13 +159,13 @@ export function EditBookmarkDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: formData.url }),
       });
-      
+
       const data: UrlInfo = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(data.error || "Failed to get URL information");
+        throw new Error(data.error || "获取链接信息失败");
       }
-      
+
       setFormData(prev => ({
         ...prev,
         title: data.title || prev.title,
@@ -175,7 +175,7 @@ export function EditBookmarkDialog({
       setAvailableIcons(data.icons || []);
     } catch (error) {
       console.error("Failed to get URL information:", error);
-      setError(error instanceof Error ? error.message : "Failed to get URL information");
+      setError(error instanceof Error ? error.message : "获取链接信息失败");
     } finally {
       setLoading(false);
     }
@@ -185,7 +185,7 @@ export function EditBookmarkDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Bookmark</DialogTitle>
+          <DialogTitle>编辑书签</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -196,15 +196,15 @@ export function EditBookmarkDialog({
           )}
 
           <div className="space-y-2">
-            <Label>Collection</Label>
+            <Label>书签合集</Label>
             <Select
               value={formData.collectionId}
-              onValueChange={(value) => 
+              onValueChange={(value) =>
                 setFormData(prev => ({ ...prev, collectionId: value }))
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select collection" />
+                <SelectValue placeholder="选择合集" />
               </SelectTrigger>
               <SelectContent>
                 {collections?.map((collection) => (
@@ -217,7 +217,7 @@ export function EditBookmarkDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>URL</Label>
+            <Label>链接地址</Label>
             <div className="flex gap-2">
               <Input
                 type="url"
@@ -233,13 +233,13 @@ export function EditBookmarkDialog({
                 onClick={handleGetInfo}
                 disabled={loading}
               >
-                {loading ? "Getting..." : "Get Info"}
+                {loading ? "获取中..." : "获取信息"}
               </Button>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Title</Label>
+            <Label>标题</Label>
             <Input
               value={formData.title}
               onChange={(e) =>
@@ -250,7 +250,7 @@ export function EditBookmarkDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Description</Label>
+            <Label>描述</Label>
             <Textarea
               value={formData.description}
               onChange={(e) =>
@@ -260,7 +260,7 @@ export function EditBookmarkDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Icon URL</Label>
+            <Label>图标链接</Label>
             <div className="flex gap-2">
               <div className="flex-1">
                 <Input
@@ -319,7 +319,7 @@ export function EditBookmarkDialog({
                 setFormData((prev) => ({ ...prev, isFeatured: checked }))
               }
             />
-            <Label>Featured</Label>
+            <Label>精选</Label>
           </div>
 
           <TagInput value={tags} onChange={setTags} />
@@ -330,10 +330,10 @@ export function EditBookmarkDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              取消
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
+              {loading ? "保存中..." : "保存"}
             </Button>
           </div>
         </form>

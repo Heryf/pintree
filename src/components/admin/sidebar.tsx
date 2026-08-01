@@ -36,26 +36,26 @@ import { Skeleton } from "../ui/skeleton";
 const menuItems = [
   {
     href: "/admin/collections",
-    label: "Collections",
+    label: "书签合集",
     icon: Library,
   },
   {
     href: "/admin/bookmarks",
-    label: "Bookmarks",
+    label: "书签管理",
     icon: Bookmark,
   },
   {
     href: "/admin/settings",
-    label: "Settings",
+    label: "设置",
     icon: Settings,
     subItems: [
       {
         href: "/admin/settings/basic",
-        label: "Basic Settings",
+        label: "基本设置",
       },
       {
         href: "/admin/settings/seo",
-        label: "SEO Settings",
+        label: "SEO 设置",
       },
     ]
   },
@@ -170,7 +170,7 @@ export function AdminSidebar() {
               className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               <LogOut className="h-4 w-4" />
-              Logout
+              退出登录
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

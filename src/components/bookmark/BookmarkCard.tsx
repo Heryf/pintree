@@ -100,7 +100,7 @@ export function BookmarkCard({
               <>
                 <span className="mx-1">/</span>
                 <span className="inline-flex items-center">
-                  <Folder className="w-3 h-3 mr-1" />
+                  <Folder className="w-3 h-3 mr-1 text-emerald-500" />
                   {folder.name}
                 </span>
               </>

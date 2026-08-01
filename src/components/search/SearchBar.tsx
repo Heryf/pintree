@@ -100,6 +100,11 @@ export function SearchBar({
   onCollectionChange 
 }: SearchBarProps) {
   const engines = ["Bookmarks", "Web Search", "AI Search"];
+  const engineLabels: { [key: string]: string } = {
+    "Bookmarks": "书签",
+    "Web Search": "网页搜索",
+    "AI Search": "AI 搜索"
+  };
   const [inputValue, setInputValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -215,7 +220,7 @@ export function SearchBar({
             onClick={() => handleEngineChange(engine)}
             aria-pressed={currentEngine === engine}
           >
-            {engine}
+            {engineLabels[engine] || engine}
           </button>
         ))}
       </div>
@@ -294,8 +299,8 @@ export function SearchBar({
                 {currentEngine === "Bookmarks" && (
                   <div className="flex items-center gap-2">
                     {[
-                      { value: 'all', label: 'All Collections' },
-                      { value: 'current', label: 'Current Collection' }
+                      { value: 'all', label: '全部合集' },
+                      { value: 'current', label: '当前合集' }
                     ].map((option) => (
                       <button
                         key={option.value}
@@ -329,7 +334,7 @@ export function SearchBar({
                         onClick={() => handleSearchEngineChange(engine)}
                       >
                         <SearchEngineIcon engine={engine} />
-                        {engine}
+                        {engineLabels[engine] || engine}
                       </button>
                     ))}
                   </div>
@@ -350,7 +355,7 @@ export function SearchBar({
                         onClick={() => setCurrentAIEngine(engine)}
                       >
                         <SearchEngineIcon engine={engine} />
-                        {engine}
+                        {engineLabels[engine] || engine}
                       </button>
                     ))}
                   </div>

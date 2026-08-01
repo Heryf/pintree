@@ -269,17 +269,17 @@ export function WebsiteSidebar({
                 {expandedFolders.has(folder.id) ? (
                   <FolderOpen
                     className={cn(
-                      "h-4 w-4 shrink-0 fill-current",
+                      "h-4 w-4 shrink-0 fill-current text-emerald-500 dark:text-emerald-400",
                       currentFolderId === folder.id &&
-                        "text-emerald-600 dark:text-emerald-400"
+                        "text-emerald-600 dark:text-emerald-300"
                     )}
                   />
                 ) : (
                   <Folder
                     className={cn(
-                      "h-4 w-4 shrink-0 fill-current",
+                      "h-4 w-4 shrink-0 fill-current text-emerald-500 dark:text-emerald-400",
                       currentFolderId === folder.id &&
-                        "text-emerald-600 dark:text-emerald-400"
+                        "text-emerald-600 dark:text-emerald-300"
                     )}
                   />
                 )}
@@ -393,7 +393,7 @@ export function WebsiteSidebar({
             ) : (
               <div className="flex flex-col items-center justify-center px-4 py-8 text-sm text-muted-foreground dark:text-gray-400 space-y-2">
                 <Folder className="h-8 w-8 opacity-50" />
-                <span>No folders yet</span>
+                <span>暂无文件夹</span>
               </div>
             )}
           </SidebarMenu>

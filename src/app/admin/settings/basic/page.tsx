@@ -88,7 +88,7 @@ export default function BasicSettingsPage() {
         }));
       } catch (error) {
         console.error("Load settings error:", error);
-        toast.error(error instanceof Error ? error.message : "Load settings failed");
+        toast.error(error instanceof Error ? error.message : "加载设置失败");
       } finally {
         setLoading(false);
       }
@@ -196,12 +196,12 @@ export default function BasicSettingsPage() {
       // 并行处理所有操作
       await Promise.all(saveSettingPromises);
   
-      toast.success(`Settings saved`);
+      toast.success(`设置已保存`);
 
       revalidateData();
     } catch (error) {
       console.error("Save settings failed:", error);
-      toast.error(error instanceof Error ? error.message : "Save settings failed");
+      toast.error(error instanceof Error ? error.message : "保存设置失败");
     } finally {
       setLoading(false);
     }
@@ -209,7 +209,7 @@ export default function BasicSettingsPage() {
 
   return (
     <div className="h-full bg-[#f9f9f9]">
-      <AdminHeader title="Basic Settings" />
+      <AdminHeader title="基本设置" />
 
       <div className="mx-auto px-4 py-12 bg-[#f9f9f9]">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-8">
@@ -219,41 +219,41 @@ export default function BasicSettingsPage() {
             className="w-full"
           >
             <TabsList className="grid w-full grid-cols-4 mb-6">
-              <TabsTrigger value="basicInfo">Basic Info</TabsTrigger>
-              <TabsTrigger value="statistics">Statistics</TabsTrigger>
-              <TabsTrigger value="footerSettings">Footer</TabsTrigger>
-              <TabsTrigger value="socialMedia">Social Media</TabsTrigger>
+              <TabsTrigger value="basicInfo">基本信息</TabsTrigger>
+              <TabsTrigger value="statistics">统计代码</TabsTrigger>
+              <TabsTrigger value="footerSettings">页脚</TabsTrigger>
+              <TabsTrigger value="socialMedia">社交媒体</TabsTrigger>
             </TabsList>
 
             <TabsContent value="basicInfo">
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground font-normal">
-                  Basic Information
+                  基本信息
                 </p>
                 <Card className="border bg-white">
                   <CardHeader className="border-b">
-                    <CardTitle>Basic Information</CardTitle>
-                    <CardDescription>Set the basic information of your website</CardDescription>
+                    <CardTitle>基本信息</CardTitle>
+                    <CardDescription>设置网站的基本信息</CardDescription>
                   </CardHeader>
                   <CardContent className="grid gap-4 p-6">
                     <div className="grid gap-2">
-                      <Label htmlFor="websiteName">Website Name</Label>
+                      <Label htmlFor="websiteName">网站名称</Label>
                       <Input
                         id="websiteName"
                         name="websiteName"
                         value={settings.websiteName}
                         onChange={handleChange}
-                        placeholder="Enter your website name"
+                        placeholder="输入您的网站名称"
                       />
                     </div>
 
                     <div className="grid gap-2">
-                      <Label>Website Logo</Label>
+                      <Label>网站 Logo</Label>
                       <LogoUploader />
                     </div>
 
                     <div className="grid gap-2">
-                      <Label>Website Favicon</Label>
+                      <Label>网站图标</Label>
                       <FaviconUploader />
                     </div>
                   </CardContent>
@@ -264,12 +264,12 @@ export default function BasicSettingsPage() {
             <TabsContent value="statistics">
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground font-normal">
-                  Statistics Code
+                  统计代码
                 </p>
                 <Card className="border bg-white">
                   <CardHeader className="border-b">
-                    <CardTitle>Statistics Code</CardTitle>
-                    <CardDescription>Set the statistics code of your website</CardDescription>
+                    <CardTitle>统计代码</CardTitle>
+                    <CardDescription>设置网站的统计代码</CardDescription>
                   </CardHeader>
                   <CardContent className="grid gap-4 p-6">
                     <div className="grid gap-2">
@@ -303,7 +303,7 @@ export default function BasicSettingsPage() {
             <TabsContent value="footerSettings">
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground font-normal">
-                  Footer Settings
+                  页脚设置
                 </p>
                 <FooterSettingsCard
                   settings={settings}
@@ -315,7 +315,7 @@ export default function BasicSettingsPage() {
             <TabsContent value="socialMedia">
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground font-normal">
-                  Social Media Links
+                  社交媒体链接
                 </p>
                 <SocialMediaCard
                   settings={settings}
@@ -327,7 +327,7 @@ export default function BasicSettingsPage() {
 
           <div className="flex justify-end">
             <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Save Settings"}
+              {loading ? "保存中..." : "保存设置"}
             </Button>
           </div>
         </form>
@@ -384,7 +384,7 @@ function LogoUploader() {
         />
       </div>
       <p className="text-sm text-muted-foreground">
-        Recommended size: 520x120px, supports PNG, JPG format
+        建议尺寸：520x120px，支持 PNG、JPG 格式
       </p>
     </div>
   );
@@ -436,7 +436,7 @@ function FaviconUploader() {
         />
       </div>
       <p className="text-sm text-muted-foreground">
-        Recommended size: 512x512px, supports ICO, PNG format
+        建议尺寸：512x512px，支持 ICO、PNG 格式
       </p>
     </div>
   );

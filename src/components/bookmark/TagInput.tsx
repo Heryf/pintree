@@ -13,10 +13,10 @@ interface TagInputProps {
 }
 
 export function TagInput({
-  label = "Tags",
+  label = "标签",
   value,
   onChange,
-  placeholder = "Type a tag and press Enter...",
+  placeholder = "输入标签后按回车添加...",
 }: TagInputProps) {
   const [input, setInput] = useState("");
 

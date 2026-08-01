@@ -35,7 +35,7 @@ export default function SeoSettingsPage() {
           ...data
         }));
       } catch (error) {
-        toast.error("Failed to load settings");
+        toast.error("加载设置失败");
       } finally {
         setLoading(false);
       }
@@ -63,22 +63,22 @@ export default function SeoSettingsPage() {
         
         const url = new URL(cleanUrl);
         if (!url.protocol.startsWith('http')) {
-          throw new Error('Website URL must start with http:// or https://');
+          throw new Error('网站链接必须以 http:// 或 https:// 开头');
         }
         
         // 验证域名格式
         const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
         if (!domainRegex.test(url.hostname)) {
-          throw new Error('Please enter a valid domain');
+          throw new Error('请输入有效的域名');
         }
 
         // 更新为清理后的 URL
         settings.siteUrl = cleanUrl;
       } else {
-        throw new Error('Please enter website URL');
+        throw new Error('请输入网站链接');
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Website URL format is incorrect');
+      toast.error(error instanceof Error ? error.message : '网站链接格式不正确');
       return;
     }
 
@@ -114,10 +114,10 @@ export default function SeoSettingsPage() {
 
       revalidateData();
 
-      toast.success("SEO settings saved");
+      toast.success("SEO 设置已保存");
     } catch (error) {
       console.error('Failed to save settings:', error);
-      toast.error(error instanceof Error ? error.message : "Failed to save settings");
+      toast.error(error instanceof Error ? error.message : "保存设置失败");
     } finally {
       setLoading(false);
     }
@@ -126,7 +126,7 @@ export default function SeoSettingsPage() {
   return (
     <div className="h-full bg-[#f9f9f9]">
       <Toaster />
-      <AdminHeader title="SEO Settings" />
+      <AdminHeader title="SEO 设置" />
 
       <div className="mx-auto px-4 py-12 bg-[#f9f9f9]">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-8">
@@ -136,22 +136,22 @@ export default function SeoSettingsPage() {
               <div className="space-y-4">
                 {/* 基础 SEO */}
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground font-normal">Basic SEO</p>
+                  <p className="text-sm text-muted-foreground font-normal">基础 SEO</p>
                   <Card className="border bg-white">
                     <CardContent className="grid gap-4 p-6">
                       <div className="grid gap-2">
                         <label htmlFor="siteUrl" className="font-medium">
-                          Website URL
+                          网站链接
                         </label>
                         <Input
                           id="siteUrl"
                           name="siteUrl"
                           value={settings.siteUrl}
                           onChange={handleChange}
-                          placeholder="Enter website full URL"
+                          placeholder="输入完整的网站链接"
                         />
                         <p className="text-sm text-muted-foreground">
-                          For example: https://github.com/Heryf/pintree
+                          例如：https://zbbsnm.icu
                         </p>
                       </div>
 
@@ -170,28 +170,28 @@ export default function SeoSettingsPage() {
 
                       <div className="grid gap-2">
                         <label htmlFor="description" className="font-medium">
-                          Website Description
+                          网站描述
                         </label>
                         <Textarea
                           id="description"
                           name="description"
                           value={settings.description}
                           onChange={handleChange}
-                          placeholder="Enter website description"
+                          placeholder="输入网站描述"
                           rows={3}
                         />
                       </div>
 
                       <div className="grid gap-2">
                         <label htmlFor="keywords" className="font-medium">
-                          Keywords
+                          关键词
                         </label>
                         <Input
                           id="keywords"
                           name="keywords"
                           value={settings.keywords}
                           onChange={handleChange}
-                          placeholder="Enter keywords, separated by commas"
+                          placeholder="输入关键词，用逗号分隔"
                         />
                       </div>
                     </CardContent>
@@ -205,7 +205,7 @@ export default function SeoSettingsPage() {
 
           <div className="flex justify-end">
             <Button type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Save Settings"}
+              {loading ? "保存中..." : "保存设置"}
             </Button>
           </div>
         </form>

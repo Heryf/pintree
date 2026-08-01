@@ -30,19 +30,19 @@ export default function CollectionsPage() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <AdminHeader title="Collections">
+      <AdminHeader title="书签合集">
         <Button
           onClick={() => setIsCreateDialogOpen(true)}
         >
           <Plus className="w-4 h-4 mr-2" />
-          New Collection
+          新建合集
         </Button>
         <Button
           variant="outline"
           onClick={() => setIsImportDialogOpen(true)}
         >
           <Upload className="w-4 h-4 mr-2" />
-          Import
+          导入
         </Button>
       </AdminHeader>
 

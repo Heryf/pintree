@@ -20,18 +20,15 @@ export function Footer() {
   return (
     <footer className="w-full border-t bg-background">
       <div className="mx-auto px-4 py-6">
-        <div className="flex flex-col lg:flex-row justify-between items-center space-y-4">
-          {/* 左侧版权信息（已移除 Powered by 作者标签）*/}
-
-          {/* 中间版权信息 */}
-
-          <div className="text-sm text-muted-foreground text-center md:text-left">
+        <div className="flex flex-col items-center justify-center space-y-4">
+          {/* 版权信息 */}
+          <div className="text-sm text-muted-foreground text-center">
             <span>{settings.copyrightText}</span>
           </div>
 
-          {/* 右侧社交媒体链接 */}
-          <div className="flex items-center space-x-4">
-            {socialLinks.map(({ key, icon, label }) => 
+          {/* 社交媒体链接 */}
+          <div className="flex items-center justify-center space-x-4">
+            {socialLinks.map(({ key, icon, label }) =>
               (key === 'contactEmail' ? settings[key] : settings[key]) && (
                 <Link
                   key={key}
