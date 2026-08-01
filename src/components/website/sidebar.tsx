@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import {
   Sidebar,
   SidebarHeader,
@@ -10,13 +9,12 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { ChevronRight, Folder, FolderOpen, Home, ChevronDown } from "lucide-react";
+import { Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSettingImages } from "@/hooks/useSettingImages";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -24,6 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Folder } from "lucide-react";
+
 interface Collection {
   id: string;
   name: string;
@@ -31,12 +31,12 @@ interface Collection {
   slug: string | null;
 }
 
-interface FolderNode {
+interface NavFolderItem {
   id: string;
   name: string;
-  icon?: string;
+  icon?: string | null;
   level: number;
-  children: FolderNode[];
+  bookmarkCount: number;
 }
 
 interface WebsiteSidebarProps {
@@ -45,293 +45,38 @@ interface WebsiteSidebarProps {
   selectedCollectionId: string;
   currentFolderId: string | null;
   collections?: Collection[];
+  navFolders?: NavFolderItem[];
+  activeSectionId?: string | null;
+  onSectionClick?: (folderId: string) => void;
 }
 
 export function WebsiteSidebar({
-  onFolderSelect,
   onCollectionChange,
   selectedCollectionId,
-  currentFolderId,
   collections = [],
+  navFolders = [],
+  activeSectionId,
+  onSectionClick,
 }: WebsiteSidebarProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [folderTree, setFolderTree] = useState<FolderNode[]>([]);
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
-    new Set()
-  );
-  const [folders, setFolders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { images, isLoading } = useSettingImages("logoUrl");
 
-  const { images, isLoading, error } = useSettingImages("logoUrl");
-
-  // 使用父组件传入的合集列表
-  useEffect(() => {
-    setLoading(false);
-  }, [collections]);
-
-  // 获取文件夹树
-  useEffect(() => {
-    if (selectedCollectionId) {
-      const fetchFolders = async () => {
-        try {
-          const response = await fetch(
-            `/api/collections/${selectedCollectionId}/folders?all=true`
-          );
-          const data = await response.json();
-          setFolders(data);
-          setFolderTree(buildFolderTree(data));
-        } catch (error) {
-          console.error("Get folders failed:", error);
-        }
-      };
-      fetchFolders();
-    }
-  }, [selectedCollectionId]);
-
-  // 添加一个新的 useEffect 来处理文件夹展开
-  useEffect(() => {
-    if (currentFolderId && folders.length > 0) {
-      const expandParentFolders = (folderId: string) => {
-        const folder = folders.find((f) => f.id === folderId);
-        if (folder && folder.parentId) {
-          setExpandedFolders((prev) => {
-            const next = new Set(prev);
-            next.add(folder.parentId!);
-            return next;
-          });
-          expandParentFolders(folder.parentId);
-        }
-      };
-
-      // 确保当前文件夹也被展开
-      setExpandedFolders((prev) => {
-        const next = new Set(prev);
-        next.add(currentFolderId);
-        return next;
-      });
-
-      expandParentFolders(currentFolderId);
-    }
-
-    // if currentFolderId is not set, and there is only one root folder, expand it
-    const rootFolders = folders.filter(folder => !folder.parentId);
-    if(!currentFolderId && rootFolders.length === 1) {
-      setExpandedFolders(new Set([rootFolders[0].id]));
-    }
-  }, [currentFolderId, folders]);
-
-  const buildFolderTree = (folders: any[]): FolderNode[] => {
-    const folderMap = new Map();
-
-    // 第一步：创建所有节点的映射
-    folders.forEach((folder) => {
-      folderMap.set(folder.id, {
-        ...folder,
-        children: [],
-        level: 0,
-        path: [],
-      });
-    });
-
-    // 第二步：计算每个文件夹的路径和层级
-    const calculateLevel = (
-      folderId: string,
-      visited = new Set<string>()
-    ): number => {
-      if (visited.has(folderId)) {
-        console.warn("Circular reference detected:", folderId);
-        return 0;
-      }
-
-      const folder = folderMap.get(folderId);
-      if (!folder) return 0;
-      if (folder.level !== 0) return folder.level; // 如果已经计算过，直接返回
-
-      visited.add(folderId);
-
-      if (!folder.parentId) {
-        folder.level = 0;
-      } else {
-        folder.level = calculateLevel(folder.parentId, visited) + 1;
-      }
-
-      visited.delete(folderId);
-      return folder.level;
-    };
-
-    // 为所有文件夹计算层级
-    folders.forEach((folder) => {
-      calculateLevel(folder.id);
-    });
-
-    // 第三步：构建树结构
-    const rootFolders: FolderNode[] = [];
-    folders.forEach((folder) => {
-      const node = folderMap.get(folder.id);
-      if (folder.parentId) {
-        const parent = folderMap.get(folder.parentId);
-        if (parent) {
-          parent.children.push(node);
-        } else {
-          // 如果找不到父文件夹，作为根文件夹处理
-          rootFolders.push(node);
-        }
-      } else {
-        rootFolders.push(node);
-      }
-    });
-
-    // 添加调试日志
-    const logFolderStructure = (folders: FolderNode[], prefix = "") => {
-      folders.forEach((folder) => {
-        console.log(`${prefix}${folder.name} (Level: ${folder.level})`);
-        if (folder.children.length > 0) {
-          logFolderStructure(folder.children, prefix + "  ");
-        }
-      });
-    };
-
-    // 在开发环境下输出文件夹结构
-    if (process.env.NODE_ENV === "development") {
-      console.log("Folder structure:");
-      logFolderStructure(rootFolders);
-    }
-
-    return rootFolders;
-  };
-
-  const toggleFolder = (folderId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setExpandedFolders((prev) => {
-      const next = new Set(prev);
-      if (next.has(folderId)) {
-        next.delete(folderId);
-      } else {
-        next.add(folderId);
-      }
-      return next;
-    });
-  };
-
-  const renderFolderTree = (folders: FolderNode[]) => {
-    return folders.map((folder) => (
-      <div key={folder.id}>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            onClick={() => handleFolderSelect(folder.id)}
-            className={cn(
-              "flex items-center w-full text-gray-700 dark:text-gray-300",
-              "transition-colors hover:bg-gray-200/50 dark:hover:bg-gray-800 active:bg-gray-200/50 dark:active:bg-gray-800 rounded-xl",
-              currentFolderId === folder.id ? "bg-gray-200/50 dark:bg-gray-800" : ""
-            )}
-            style={{
-              paddingLeft: `${folder.level * 5 + 12}px`,
-            }}
-          >
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="flex items-center w-8">
-                {folder.children.length > 0 ? (
-                  <ChevronRight
-                    className={cn(
-                      "h-4 w-4 shrink-0 transition-transform",
-                      expandedFolders.has(folder.id) && "rotate-90",
-                      currentFolderId === folder.id &&
-                        "text-emerald-600 dark:text-emerald-400"
-                    )}
-                    onClick={(e) => toggleFolder(folder.id, e)}
-                  />
-                ) : (
-                  <div className="w-4" />
-                )}
-                {expandedFolders.has(folder.id) ? (
-                  <FolderOpen
-                    className={cn(
-                      "h-4 w-4 shrink-0 fill-current text-emerald-500 dark:text-emerald-400",
-                      currentFolderId === folder.id &&
-                        "text-emerald-600 dark:text-emerald-300"
-                    )}
-                  />
-                ) : (
-                  <Folder
-                    className={cn(
-                      "h-4 w-4 shrink-0 fill-current text-emerald-500 dark:text-emerald-400",
-                      currentFolderId === folder.id &&
-                        "text-emerald-600 dark:text-emerald-300"
-                    )}
-                  />
-                )}
-              </div>
-              <span
-                className={cn(
-                  "truncate text-gray-800 dark:text-gray-200",
-                  currentFolderId === folder.id &&
-                    "text-emerald-600 dark:text-emerald-400 font-medium"
-                )}
-              >
-                {folder.name}
-              </span>
-            </div>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-
-        {expandedFolders.has(folder.id) && folder.children.length > 0 && (
-          <div>{renderFolderTree(folder.children)}</div>
-        )}
-      </div>
-    ));
-  };
-
-  const handleFolderSelect = (folderId: string) => {
-    // 如果文件夹有子文件夹，则展开/折叠该文件夹
-    const folder = folders.find((f) => f.id === folderId);
-    if (folder) {
-      const hasChildren = folders.some((f) => f.parentId === folderId);
-      if (hasChildren) {
-        setExpandedFolders((prev) => {
-          const next = new Set(prev);
-          if (next.has(folderId)) {
-            next.delete(folderId);
-          } else {
-            next.add(folderId);
-          }
-          return next;
-        });
-      }
-    }
-
-    // 原有的文件夹选择逻辑
-    if (onFolderSelect) {
-      onFolderSelect(folderId);
+  const handleNavClick = (folderId: string) => {
+    if (onSectionClick) {
+      onSectionClick(folderId);
     } else {
-      const currentSearchParams = new URLSearchParams(searchParams.toString());
-      currentSearchParams.set("folderId", folderId);
-      router.push(`${pathname}?${currentSearchParams.toString()}`, {
-        scroll: false,
+      document.getElementById(`section-${folderId}`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
       });
     }
-  };
-
-  const SidebarSkeleton = () => {
-    return (
-      <div className="space-y-4 p-4">
-        {/* 文件夹列表骨架屏 */}
-        <div className="space-y-2">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-8 w-full rounded-md" />
-          ))}
-        </div>
-      </div>
-    );
   };
 
   return (
-    <Sidebar className="flex flex-col h-screen bg-[#F9F9F9] dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
+    <Sidebar className="flex flex-col h-screen bg-[#FAFAFA] dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 monochrome:bg-sidebar-background monochrome:border-sidebar-border">
       <SidebarHeader className="flex-shrink-0">
         <SidebarMenu>
           <SidebarMenuItem>
-            {loading ? (
+            {isLoading ? (
               <Skeleton className="h-10 w-full" />
             ) : (
               <SidebarMenuButton
@@ -343,19 +88,13 @@ export function WebsiteSidebar({
                   href="/"
                   className="pl-0 flex items-center gap-2 justify-start rounded-none pr-0 w-full h-[60px]"
                 >
-                  {isLoading ? (
-                    <Skeleton className="w-[260px] h-[60px]" />
-                  ) : (
-                    <Image
-                      src={images[0]?.url || "/logo.png"}
-                      alt="Logo"
-                      width={260}
-                      height={60}
-                      style={{
-                        objectFit: "contain",
-                      }}
-                    />
-                  )}
+                  <Image
+                    src={images[0]?.url || "/logo.png"}
+                    alt="Logo"
+                    width={260}
+                    height={60}
+                    style={{ objectFit: "contain" }}
+                  />
                 </Link>
               </SidebarMenuButton>
             )}
@@ -364,7 +103,7 @@ export function WebsiteSidebar({
       </SidebarHeader>
 
       {/* 合集选择与返回首页 */}
-      <div className="px-3 py-3 space-y-2 border-b border-gray-200 dark:border-gray-800">
+      <div className="px-3 py-3 space-y-2 border-b border-gray-200 dark:border-gray-800 monochrome:border-sidebar-border">
         <Link
           href="/"
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-2"
@@ -376,19 +115,17 @@ export function WebsiteSidebar({
           <Select
             value={selectedCollectionId}
             onValueChange={(value) => {
-              if (onCollectionChange) {
-                onCollectionChange(value);
-              }
+              if (onCollectionChange) onCollectionChange(value);
             }}
           >
-            <SelectTrigger className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <SelectTrigger className="w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 monochrome:bg-white/5 monochrome:border-white/10">
               <SelectValue placeholder="选择书签合集" />
             </SelectTrigger>
             <SelectContent>
               {collections.map((collection) => (
                 <SelectItem key={collection.id} value={collection.id}>
                   <div className="flex items-center gap-2">
-                    <Folder className="h-3.5 w-3.5 text-emerald-500" />
+                    <Folder className="h-3.5 w-3.5 text-emerald-500 monochrome:text-white/70" />
                     {collection.name}
                   </div>
                 </SelectItem>
@@ -396,21 +133,39 @@ export function WebsiteSidebar({
             </SelectContent>
           </Select>
         )}
-        {collections.length <= 1 && selectedCollectionId && (
-          <div className="flex items-center gap-2 px-2 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-            <Folder className="h-4 w-4" />
-            {collections.find((c) => c.id === selectedCollectionId)?.name || "当前合集"}
-          </div>
-        )}
       </div>
 
+      {/* 扁平导航列表 */}
       <SidebarContent className="flex-1 min-h-0 overflow-y-auto hide-scrollbar">
         <SidebarGroup>
-          <SidebarMenu>
-            {loading ? (
-              <SidebarSkeleton />
-            ) : folderTree.length > 0 ? (
-              renderFolderTree(folderTree)
+          <SidebarMenu className="space-y-0.5 px-2">
+            {navFolders.length > 0 ? (
+              navFolders.map((folder) => (
+                <SidebarMenuItem key={folder.id}>
+                  <SidebarMenuButton
+                    onClick={() => handleNavClick(folder.id)}
+                    className={cn(
+                      "flex items-center w-full rounded-lg transition-all duration-200 py-2",
+                      "hover:bg-gray-100 dark:hover:bg-gray-800/60",
+                      "monochrome:hover:bg-white/8",
+                      activeSectionId === folder.id
+                        ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 font-medium monochrome:bg-white/10 monochrome:text-white"
+                        : "text-gray-600 dark:text-gray-400 monochrome:text-white/70",
+                    )}
+                    style={{
+                      paddingLeft: `${folder.level * 14 + 12}px`,
+                      paddingRight: "12px",
+                    }}
+                  >
+                    <span className="truncate text-sm">{folder.name}</span>
+                    {folder.bookmarkCount > 0 && (
+                      <span className="ml-auto text-[10px] text-muted-foreground/60 dark:text-gray-600 monochrome:text-white/40 flex-shrink-0">
+                        {folder.bookmarkCount}
+                      </span>
+                    )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))
             ) : (
               <div className="flex flex-col items-center justify-center px-4 py-8 text-sm text-muted-foreground dark:text-gray-400 space-y-2">
                 <Folder className="h-8 w-8 opacity-50" />
@@ -419,7 +174,7 @@ export function WebsiteSidebar({
             )}
           </SidebarMenu>
         </SidebarGroup>
-      </SidebarContent>{" "}
+      </SidebarContent>
     </Sidebar>
   );
 }

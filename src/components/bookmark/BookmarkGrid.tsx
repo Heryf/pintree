@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { BookmarkCard } from "./BookmarkCard";
 import { FolderCard } from "./FolderCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronRight, LayoutGrid, List } from "lucide-react";
+import { ChevronRight, LayoutGrid, List, Droplets, Eye, EyeOff, Link as LinkIcon, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SearchBar } from "@/components/search/SearchBar";
@@ -104,6 +104,9 @@ export function BookmarkGrid({
   const [currentEngine, setCurrentEngine] = useState("Bookmarks");
   const [enableSearch, setEnableSearch] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [bookmarkStyle, setBookmarkStyle] = useState<'default' | 'glass'>('default');
+  const [showUrl, setShowUrl] = useState(true);
+  const [showDescription, setShowDescription] = useState(true);
 
   const routeToFolderInCollection = (collectionSlug: string, folderId?: string) => {
     const currentSearchParams = new URLSearchParams(searchParams.toString());
@@ -247,11 +250,14 @@ export function BookmarkGrid({
         const response = await fetch('/api/settings?group=feature');
         const data = await response.json();
         setEnableSearch(data.enableSearch === 'true' || data.enableSearch === true);
+        setBookmarkStyle(data.bookmarkStyle === 'glass' ? 'glass' : 'default');
+        setShowUrl(data.showBookmarkUrl !== 'false' && data.showBookmarkUrl !== false);
+        setShowDescription(data.showBookmarkDescription !== 'false' && data.showBookmarkDescription !== false);
       } catch (error) {
         console.error('Load search settings failed:', error);
       }
     };
-    
+
     loadSearchSetting();
   }, []);
 
@@ -308,25 +314,72 @@ export function BookmarkGrid({
         </div>
       )}
 
-      {/* 视图切换按钮 */}
+      {/* 视图与展示风格切换 */}
       {!inputValue && (
-        <div className="flex justify-end gap-1">
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size="icon"
-            onClick={() => setViewMode('grid')}
-            aria-label="网格视图"
-          >
-            <LayoutGrid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'outline'}
-            size="icon"
-            onClick={() => setViewMode('list')}
-            aria-label="列表视图"
-          >
-            <List className="h-4 w-4" />
-          </Button>
+        <div className="flex justify-end gap-2">
+          <div className="flex items-center gap-1 rounded-md border p-1">
+            <Button
+              variant={bookmarkStyle === 'default' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setBookmarkStyle('default')}
+              className="h-7 px-2 text-xs"
+              aria-label="默认样式"
+            >
+              默认
+            </Button>
+            <Button
+              variant={bookmarkStyle === 'glass' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setBookmarkStyle('glass')}
+              className="h-7 px-2 text-xs"
+              aria-label="毛玻璃样式"
+            >
+              <Droplets className="h-3 w-3 mr-1" />
+              毛玻璃
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-1 rounded-md border p-1">
+            <Button
+              variant={showUrl ? 'default' : 'ghost'}
+              size="icon"
+              onClick={() => setShowUrl((v) => !v)}
+              className="h-7 w-7"
+              aria-label={showUrl ? '隐藏链接' : '显示链接'}
+              title={showUrl ? '隐藏链接' : '显示链接'}
+            >
+              {showUrl ? <LinkIcon className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+            </Button>
+            <Button
+              variant={showDescription ? 'default' : 'ghost'}
+              size="icon"
+              onClick={() => setShowDescription((v) => !v)}
+              className="h-7 w-7"
+              aria-label={showDescription ? '隐藏说明' : '显示说明'}
+              title={showDescription ? '隐藏说明' : '显示说明'}
+            >
+              {showDescription ? <FileText className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="icon"
+              onClick={() => setViewMode('grid')}
+              aria-label="网格视图"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="icon"
+              onClick={() => setViewMode('list')}
+              aria-label="列表视图"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
 
@@ -393,6 +446,9 @@ export function BookmarkGrid({
                     isFeatured={bookmark.isFeatured}
                     tags={bookmark.tags}
                     compact={viewMode === 'list'}
+                    glass={bookmarkStyle === 'glass'}
+                    showUrl={showUrl}
+                    showDescription={showDescription}
                   />
                 ))}
               </div>
@@ -441,6 +497,9 @@ export function BookmarkGrid({
                         isFeatured={bookmark.isFeatured}
                         tags={bookmark.tags}
                         compact={viewMode === 'list'}
+                        glass={bookmarkStyle === 'glass'}
+                        showUrl={showUrl}
+                        showDescription={showDescription}
                       />
                     ))}
                   </div>

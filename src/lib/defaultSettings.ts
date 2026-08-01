@@ -200,6 +200,41 @@ export const defaultSettings: SettingItem[] = [
 
   // 功能设置
   {
+    key: "defaultTheme",
+    value: "light",
+    type: "string",
+    group: "feature",
+    description: "默认主题：light、dark、monochrome"
+  },
+  {
+    key: "bookmarkStyle",
+    value: "default",
+    type: "string",
+    group: "feature",
+    description: "书签卡片样式：default、glass"
+  },
+  {
+    key: "showBookmarkUrl",
+    value: "true",
+    type: "boolean",
+    group: "feature",
+    description: "显示书签链接"
+  },
+  {
+    key: "showBookmarkDescription",
+    value: "true",
+    type: "boolean",
+    group: "feature",
+    description: "显示书签说明"
+  },
+  {
+    key: "wallpaperUrl",
+    value: "",
+    type: "string",
+    group: "feature",
+    description: "壁纸图片 URL"
+  },
+  {
     key: "enableSearch",
     value: "true",
     type: "boolean",

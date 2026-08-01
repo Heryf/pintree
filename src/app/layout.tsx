@@ -172,7 +172,7 @@ export default async function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="light" themes={["light", "dark", "monochrome"]} enableSystem={false} disableTransitionOnChange>
           <SessionProvider>{children}</SessionProvider>
         </ThemeProvider>
         <Toaster />
