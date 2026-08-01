@@ -31,25 +31,19 @@ export default function CollectionsPage() {
   return (
     <div className="flex-1 flex flex-col">
       <AdminHeader title="Collections">
-        {hasCollections && (
-          <>
-            <Button
-              onClick={() => setIsCreateDialogOpen(true)}
-              disabled={hasCollections}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Collection
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setIsImportDialogOpen(true)}
-              disabled={hasCollections}
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Import
-            </Button>
-          </>
-        )}
+        <Button
+          onClick={() => setIsCreateDialogOpen(true)}
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          New Collection
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => setIsImportDialogOpen(true)}
+        >
+          <Upload className="w-4 h-4 mr-2" />
+          Import
+        </Button>
       </AdminHeader>
 
       <main className="flex-1 overflow-y-auto p-8 bg-card/50">

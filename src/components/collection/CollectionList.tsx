@@ -108,7 +108,6 @@ export function CollectionList({ onCollectionsChange }: { onCollectionsChange: (
             <Button
               variant="outline"
               onClick={() => setIsCreateDialogOpen(true)}
-              disabled={collections.length > 0}
             >
               <Plus className="mr-2 h-4 w-4" />
               Create Collection
@@ -116,7 +115,6 @@ export function CollectionList({ onCollectionsChange }: { onCollectionsChange: (
             <Button
               variant="default"
               onClick={() => setIsImportDialogOpen(true)}
-              disabled={collections.length > 0}
             >
               <Upload className="mr-2 h-4 w-4" />
               Import Json

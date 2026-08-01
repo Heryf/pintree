@@ -243,9 +243,9 @@ export function WebsiteSidebar({
           <SidebarMenuButton
             onClick={() => handleFolderSelect(folder.id)}
             className={cn(
-              "flex items-center w-full",
-              "transition-colors hover:bg-gray-200/50 active:bg-gray-200/50 rounded-xl",
-              currentFolderId === folder.id ? "bg-gray-200/50" : ""
+              "flex items-center w-full text-gray-700 dark:text-gray-300",
+              "transition-colors hover:bg-gray-200/50 dark:hover:bg-gray-800 active:bg-gray-200/50 dark:active:bg-gray-800 rounded-xl",
+              currentFolderId === folder.id ? "bg-gray-200/50 dark:bg-gray-800" : ""
             )}
             style={{
               paddingLeft: `${folder.level * 5 + 12}px`,
@@ -286,7 +286,7 @@ export function WebsiteSidebar({
               </div>
               <span
                 className={cn(
-                  "truncate",
+                  "truncate text-gray-800 dark:text-gray-200",
                   currentFolderId === folder.id &&
                     "text-emerald-600 dark:text-emerald-400 font-medium"
                 )}
@@ -348,7 +348,7 @@ export function WebsiteSidebar({
   };
 
   return (
-    <Sidebar className="flex flex-col h-screen bg-[#F9F9F9]">
+    <Sidebar className="flex flex-col h-screen bg-[#F9F9F9] dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
       <SidebarHeader className="flex-shrink-0">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -391,7 +391,7 @@ export function WebsiteSidebar({
             ) : folderTree.length > 0 ? (
               renderFolderTree(folderTree)
             ) : (
-              <div className="flex flex-col items-center justify-center px-4 py-8 text-sm text-muted-foreground space-y-2">
+              <div className="flex flex-col items-center justify-center px-4 py-8 text-sm text-muted-foreground dark:text-gray-400 space-y-2">
                 <Folder className="h-8 w-8 opacity-50" />
                 <span>No folders yet</span>
               </div>
