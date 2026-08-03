@@ -83,14 +83,14 @@ export function CollectionCard({ collection, onUpdate }: CollectionCardProps) {
       document.body.removeChild(a);
 
       toast({
-        title: "导出成功",
-        description: "书签合集已成功导出",
+        title: "Export Success",
+        description: "Your bookmark collection has been exported successfully",
       });
     } catch (error) {
       console.error('Export failed:', error);
       toast({
-        title: "导出失败",
-        description: "请稍后重试",
+        title: "Export failed",
+        description: "Please try again later",
         variant: "destructive",
       });
     }
@@ -99,8 +99,8 @@ export function CollectionCard({ collection, onUpdate }: CollectionCardProps) {
   return (
     <>
       <div className="relative group">
-        <Card className="absolute w-[98%] h-full bg-muted rounded-3xl border-none bg-gray-100 group-hover:rotate-2 transition-transform duration-300" />
-        <Card onClick={handleClick} className="relative cursor-pointer hover:-translate-y-2 transition-all rounded-3xl bg-gradient-to-b from-white to-green-50/50 border-gray-200">
+        <Card className="absolute w-[98%] h-full rounded-3xl border-none bg-muted group-hover:rotate-2 transition-transform duration-300" />
+        <Card onClick={handleClick} className="relative cursor-pointer hover:-translate-y-2 transition-all rounded-3xl bg-card border-border">
           <CardContent className="p-6">
             <div className="flex flex-col h-[120px]">
               <div className="flex items-start justify-between gap-4">
@@ -123,18 +123,18 @@ export function CollectionCard({ collection, onUpdate }: CollectionCardProps) {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
                       <Edit className="w-4 h-4 mr-2" />
-                      编辑
+                      Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleExport}>
                       <Download className="w-4 h-4 mr-2" />
-                      导出
+                      Export
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-red-600"
                       onClick={() => setIsDeleteDialogOpen(true)}
                     >
                       <Trash className="w-4 h-4 mr-2" />
-                      删除
+                      Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -172,7 +172,7 @@ export function CollectionCard({ collection, onUpdate }: CollectionCardProps) {
           <DialogHeader>
             <DialogTitle>删除书签合集</DialogTitle>
             <DialogDescription>
-              确定要删除「{collection.name}」书签合集吗？此操作无法撤销。
+              确定要删除"{collection.name}"书签合集吗？此操作无法撤销。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

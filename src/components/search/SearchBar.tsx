@@ -92,19 +92,14 @@ const SearchEngineIcon = ({ engine }: { engine: string }) => {
 };
 
 export function SearchBar({ 
-  placeholder = "Search bookmarks...", 
+  placeholder = "搜索书签...", 
   onSearch, 
-  currentEngine = "Bookmarks", 
+  currentEngine = "书签", 
   onEngineChange, 
   currentCollection = 'all', 
   onCollectionChange 
 }: SearchBarProps) {
-  const engines = ["Bookmarks", "Web Search", "AI Search"];
-  const engineLabels: { [key: string]: string } = {
-    "Bookmarks": "书签",
-    "Web Search": "网页搜索",
-    "AI Search": "AI 搜索"
-  };
+  const engines = ["书签", "网页搜索", "AI搜索"];
   const [inputValue, setInputValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -121,7 +116,7 @@ export function SearchBar({
   };
 
   useEffect(() => {
-    if (currentEngine && currentEngine !== "Bookmarks") {
+    if (currentEngine && currentEngine !== "书签") {
       setInputValue("");
     }
   }, [currentEngine]);
@@ -133,14 +128,14 @@ export function SearchBar({
       return;
     }
     
-    if (currentEngine === "Bookmarks") {
+    if (currentEngine === "书签") {
       setIsSearching(true);
       try {
         onSearch?.(inputValue.trim(), currentCollection);
       } finally {
         setIsSearching(false);
       }
-    } else if (currentEngine === "Web Search") {
+    } else if (currentEngine === "网页搜索") {
       const searchUrls: { [key: string]: string } = {
         Google: `https://www.google.com/search?q=${encodeURIComponent(inputValue)}`,
         Baidu: `https://www.baidu.com/s?wd=${encodeURIComponent(inputValue)}`,
@@ -152,7 +147,7 @@ export function SearchBar({
       if (url) {
         window.open(url, '_blank');
       }
-    } else if (currentEngine === "AI Search") {
+    } else if (currentEngine === "AI搜索") {
       const url = aiSearchEngines[currentAIEngine as keyof typeof aiSearchEngines];
       if (url) {
         window.open(url + encodeURIComponent(inputValue), '_blank');
@@ -161,7 +156,7 @@ export function SearchBar({
   };
 
   const handleEngineChange = (engine: string) => {
-    if (engine === "Web Search") {
+    if (engine === "网页搜索") {
       onEngineChange?.(engine);
       if (!currentSearchEngine) {
         setCurrentSearchEngine("Google");
@@ -175,7 +170,7 @@ export function SearchBar({
 
   const handleSearchEngineChange = (engine: string) => {
     setCurrentSearchEngine(engine);
-    onEngineChange?.("Web Search");
+    onEngineChange?.("网页搜索");
   };
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
@@ -214,13 +209,13 @@ export function SearchBar({
             key={engine}
             className={`px-3 py-1 text-sm rounded-t-lg transition-all ${
               currentEngine === engine 
-                ? "bg-black text-white font-medium shadow-sm" 
-                : "hover:bg-gray-100 text-gray-600 hover:text-gray-900"
+                ? "bg-primary text-primary-foreground font-medium shadow-sm" 
+                : "hover:bg-accent text-muted-foreground hover:text-foreground"
             }`}
             onClick={() => handleEngineChange(engine)}
             aria-pressed={currentEngine === engine}
           >
-            {engineLabels[engine] || engine}
+            {engine}
           </button>
         ))}
       </div>
@@ -243,12 +238,12 @@ export function SearchBar({
               ref={editorRef}
               contentEditable
               className={`
-                outline-none border rounded-xl w-full text-sm
-                ${!inputValue && !isFocused ? 'pl-10' : 'pl-4'} 
-                pr-12 
+                outline-none border border-border rounded-xl w-full text-sm bg-background
+                ${!inputValue && !isFocused ? 'pl-10' : 'pl-4'}
+                pr-12
                 ${isFocused || inputValue ? 'pb-12' : 'pb-3'}
                 pt-3
-                focus:ring-1 focus:ring-black/5
+                focus:ring-1 focus:ring-ring/20
                 hide-scrollbar
                 transition-all duration-200 ease-in-out
               `}
@@ -273,17 +268,16 @@ export function SearchBar({
             />
 
             {(isFocused || inputValue) && (
-              <div 
+              <div
                 className={`
                   absolute bottom-[12px] left-4 flex items-center gap-4 py-1 w-[calc(100%-3rem)]
-                  transition-all duration-300 ease-in-out
+                  bg-background transition-all duration-300 ease-in-out
                   ${isFocused || inputValue
-                    ? 'opacity-100 translate-y-0' 
+                    ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-4 pointer-events-none'
                   }
                 `}
                 style={{
-                  background: 'linear-gradient(to bottom, transparent, white 15%, white)',
                   pointerEvents: 'auto',
                   zIndex: 10,
                   paddingBottom: '0.75rem',
@@ -296,7 +290,7 @@ export function SearchBar({
                   e.stopPropagation();
                 }}
               >
-                {currentEngine === "Bookmarks" && (
+                {currentEngine === "书签" && (
                   <div className="flex items-center gap-2">
                     {[
                       { value: 'all', label: '全部合集' },
@@ -307,8 +301,8 @@ export function SearchBar({
                         className={`
                           text-sm flex items-center gap-2 px-3 py-1.5 rounded-full transition-all
                           ${currentCollection === option.value
-                            ? "bg-gray-100 border border-gray-200 text-black font-medium" 
-                            : "text-gray-600 border border-gray-100 hover:border-gray-200"
+                            ? "bg-accent border border-border text-foreground font-medium"
+                            : "text-muted-foreground border border-border/50 hover:border-border"
                           }
                         `}
                         onClick={() => onCollectionChange?.(option.value as 'all' | 'current')}
@@ -319,43 +313,43 @@ export function SearchBar({
                   </div>
                 )}
 
-                {currentEngine === "Web Search" && (
+                {currentEngine === "网页搜索" && (
                   <div className="flex items-center gap-2">
                     {['Google', 'Bing', 'Yandex', 'Baidu'].map((engine) => (
                       <button 
                         key={engine}
                         className={`
                           text-sm flex items-center gap-2 px-3 py-1.5 rounded-full transition-all
-                          ${currentSearchEngine === engine 
-                            ? "bg-gray-100 border border-gray-200 text-black font-medium" 
-                            : "text-gray-600 border border-gray-100 hover:border-gray-200"
+                          ${currentSearchEngine === engine
+                            ? "bg-accent border border-border text-foreground font-medium"
+                            : "text-muted-foreground border border-border/50 hover:border-border"
                           }
                         `}
                         onClick={() => handleSearchEngineChange(engine)}
                       >
                         <SearchEngineIcon engine={engine} />
-                        {engineLabels[engine] || engine}
+                        {engine}
                       </button>
                     ))}
                   </div>
                 )}
 
-                {currentEngine === "AI Search" && (
+                {currentEngine === "AI搜索" && (
                   <div className="flex items-center gap-2 flex-wrap">
                     {Object.keys(aiSearchEngines).map((engine) => (
                       <button 
                         key={engine}
                         className={`
                           text-sm flex items-center gap-2 px-3 py-1.5 rounded-full transition-all
-                          ${currentAIEngine === engine 
-                            ? "bg-gray-100 border border-gray-200 text-black font-medium" 
-                            : "text-gray-600 border border-gray-100 hover:border-gray-200"
+                          ${currentAIEngine === engine
+                            ? "bg-accent border border-border text-foreground font-medium"
+                            : "text-muted-foreground border border-border/50 hover:border-border"
                           }
                         `}
                         onClick={() => setCurrentAIEngine(engine)}
                       >
                         <SearchEngineIcon engine={engine} />
-                        {engineLabels[engine] || engine}
+                        {engine}
                       </button>
                     ))}
                   </div>
@@ -378,14 +372,14 @@ export function SearchBar({
                 e.stopPropagation();
               }}
             >
-              <div 
-                className="bg-black rounded-full p-1.5 cursor-pointer hover:bg-gray-800 transition-colors"
+              <div
+                className="bg-primary rounded-full p-1.5 cursor-pointer hover:bg-primary/90 transition-colors"
                 onClick={handleSearch}
               >
                 {isSearching ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
                 ) : (
-                  <ArrowRight className="h-4 w-4 text-white" />
+                  <ArrowRight className="h-4 w-4 text-primary-foreground" />
                 )}
               </div>
             </div>

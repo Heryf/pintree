@@ -63,7 +63,7 @@ export default function SeoSettingsPage() {
         
         const url = new URL(cleanUrl);
         if (!url.protocol.startsWith('http')) {
-          throw new Error('网站链接必须以 http:// 或 https:// 开头');
+          throw new Error('网站URL必须以 http:// 或 https:// 开头');
         }
         
         // 验证域名格式
@@ -75,10 +75,10 @@ export default function SeoSettingsPage() {
         // 更新为清理后的 URL
         settings.siteUrl = cleanUrl;
       } else {
-        throw new Error('请输入网站链接');
+        throw new Error('请输入网站URL');
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : '网站链接格式不正确');
+      toast.error(error instanceof Error ? error.message : '网站URL格式不正确');
       return;
     }
 
@@ -101,7 +101,7 @@ export default function SeoSettingsPage() {
           if (!response.ok) {
             const errorData = await response.json();
             console.error("API error response:", errorData);
-            throw new Error(errorData.error || "Save failed");
+            throw new Error(errorData.error || "保存失败");
           }
           return response.json();
         }).then(result => {
@@ -114,7 +114,7 @@ export default function SeoSettingsPage() {
 
       revalidateData();
 
-      toast.success("SEO 设置已保存");
+      toast.success("SEO设置已保存");
     } catch (error) {
       console.error('Failed to save settings:', error);
       toast.error(error instanceof Error ? error.message : "保存设置失败");
@@ -124,11 +124,11 @@ export default function SeoSettingsPage() {
   };
 
   return (
-    <div className="h-full bg-[#f9f9f9]">
+    <div className="h-full bg-background">
       <Toaster />
-      <AdminHeader title="SEO 设置" />
+      <AdminHeader title="SEO设置" />
 
-      <div className="mx-auto px-4 py-12 bg-[#f9f9f9]">
+      <div className="mx-auto px-4 py-12 bg-background">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-8">
           <div className="space-y-8">
             {/* SEO 设置 */}
@@ -136,22 +136,22 @@ export default function SeoSettingsPage() {
               <div className="space-y-4">
                 {/* 基础 SEO */}
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground font-normal">基础 SEO</p>
-                  <Card className="border bg-white">
+                  <p className="text-sm text-muted-foreground font-normal">基础SEO</p>
+                  <Card>
                     <CardContent className="grid gap-4 p-6">
                       <div className="grid gap-2">
                         <label htmlFor="siteUrl" className="font-medium">
-                          网站链接
+                          网站URL
                         </label>
                         <Input
                           id="siteUrl"
                           name="siteUrl"
                           value={settings.siteUrl}
                           onChange={handleChange}
-                          placeholder="输入完整的网站链接"
+                          placeholder="输入网站完整URL"
                         />
                         <p className="text-sm text-muted-foreground">
-                          例如：https://zbbsnm.icu
+                          例如：https://github.com/Heryf/pintree
                         </p>
                       </div>
 

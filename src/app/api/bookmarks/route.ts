@@ -39,7 +39,6 @@ export async function GET(request: Request) {
               name: true,
             },
           },
-          tags: true,
         },
         skip,
         take: pageSize,
@@ -108,18 +107,6 @@ export async function POST(request: Request) {
       }
 
       Object.assign(bookmarkData, { folderId });
-    }
-
-    // 处理标签：connectOrCreate
-    if (tags && Array.isArray(tags) && tags.length > 0) {
-      Object.assign(bookmarkData, {
-        tags: {
-          connectOrCreate: tags.map((name: string) => ({
-            where: { name: name.trim() },
-            create: { name: name.trim() },
-          })),
-        },
-      });
     }
 
     const bookmark = await prisma.bookmark.create({

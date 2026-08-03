@@ -34,14 +34,17 @@ export default function LoginPage() {
 
       if (result?.error) {
         switch (result.error) {
-          case "请输入邮箱和密码":
-            setError("请输入邮箱和密码");
+          case "Please enter email and password":
+            setError("Please enter email and password");
             break;
-          case "邮箱或密码不正确":
-            setError("邮箱或密码不正确");
+          case "User does not exist":
+            setError("User does not exist");
+            break;
+          case "Incorrect password":
+            setError("Incorrect password");
             break;
           default:
-            setError("登录失败，请重试");
+            setError("Login failed, please try again");
         }
       } else {
         if (initializeDatabase) {
@@ -53,13 +56,13 @@ export default function LoginPage() {
             
             if (result.status !== 'success') {
               // 处理初始化失败的情况
-              setError(result.message || "数据库初始化失败");
+              setError(result.message || "Database initialization failed");
               return;
             }
             revalidateData();
           } catch (error) {
             // 处理网络错误或解析错误
-            setError("数据库初始化失败");
+            setError("Database initialization failed");
             return;
           }
         }
@@ -67,7 +70,7 @@ export default function LoginPage() {
         router.refresh();
       }
     } catch (error) {
-      setError("登录失败，请重试");
+      setError("Login failed, please try again");
     } finally {
       setLoading(false);
     }
@@ -86,10 +89,10 @@ export default function LoginPage() {
             className="mb-8"
           />
           <h1 className="text-4xl font-bold mb-6">
-            欢迎使用 Pizza
+            Welcome to Pintree
           </h1>
           <p className="text-xl opacity-90 leading-relaxed">
-            一个强大的书签管理平台，帮助您更好地整理和分享网络资源。
+            A powerful bookmark management platform to help you better organize and share web resources.
           </p>
         </div>
       </div>
@@ -109,8 +112,8 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">登录管理后台</h2>
-            <p className="mt-2 text-gray-600">管理您的书签合集</p>
+            <h2 className="text-3xl font-bold text-gray-900">Login to Admin</h2>
+            <p className="mt-2 text-gray-600">Manage your bookmark collections</p>
           </div>
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -118,7 +121,7 @@ export default function LoginPage() {
               <Input
                 name="email"
                 type="email"
-                label="邮箱地址"
+                label="Email Address"
                 required
                 autoComplete="email"
                 className="h-12"
@@ -126,7 +129,7 @@ export default function LoginPage() {
               <Input
                 name="password"
                 type="password"
-                label="密码"
+                label="Password"
                 required
                 autoComplete="current-password"
                 className="h-12"
@@ -150,7 +153,7 @@ export default function LoginPage() {
                   checked={initializeDatabase}
                   onChange={(e) => setInitializeDatabase(e.target.checked)}
                 />
-                <span className="ml-2 text-sm text-gray-600">初始化数据库</span>
+                <span className="ml-2 text-sm text-gray-600">Initialize Database</span>
               </label>
             </div>
 
@@ -169,10 +172,10 @@ export default function LoginPage() {
               {loading ? (
                 <div className="flex items-center justify-center">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  登录中...
+                  Logging in...
                 </div>
               ) : (
-                "登录"
+                "Login"
               )}
             </Button>
 

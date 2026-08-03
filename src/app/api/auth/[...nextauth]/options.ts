@@ -23,14 +23,14 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("请输入邮箱和密码");
+          throw new Error("Please enter email and password");
         }
 
         const adminEmail = process.env.ADMIN_EMAIL;
         const adminPassword = process.env.ADMIN_PASSWORD;
 
         if (credentials.email !== adminEmail || credentials.password !== adminPassword) {
-          throw new Error("邮箱或密码不正确");
+          throw new Error("Email or password is incorrect");
         }
 
         return {

@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
 
 interface Folder {
   id: string;
@@ -80,27 +79,20 @@ export function CreateFolderDialog({
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const message =
-          errorData?.error || `Failed to create folder (HTTP ${response.status})`;
-        throw new Error(message);
+        throw new Error("Failed to create");
       }
 
-      toast.success("文件夹创建成功");
       onOpenChange(false);
       onSuccess?.();
-
+      
       setFormData({
         name: "",
         isPublic: true,
         password: "",
-        parentId: currentFolderId || "root",
+        parentId: currentFolderId || "",
       });
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "创建文件夹失败";
       console.error("Failed to create folder:", error);
-      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -110,12 +102,12 @@ export function CreateFolderDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>新建文件夹</DialogTitle>
+          <DialogTitle>New Folder</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>名称</Label>
+            <Label>Name</Label>
             <Input
               value={formData.name}
               onChange={(e) =>
@@ -126,7 +118,7 @@ export function CreateFolderDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>父文件夹</Label>
+            <Label>Parent Folder</Label>
             <Select
               value={formData.parentId}
               onValueChange={(value) =>
@@ -134,10 +126,10 @@ export function CreateFolderDialog({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="选择父文件夹" />
+                <SelectValue placeholder="Select Parent Folder" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="root">根目录</SelectItem>
+                <SelectItem value="root">Root</SelectItem>
                 {folders.map((folder) => (
                   <SelectItem key={folder.id} value={folder.id}>
                     {folder.name}
@@ -178,10 +170,10 @@ export function CreateFolderDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              取消
+              Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "创建中..." : "创建"}
+              {loading ? "Creating..." : "Create"}
             </Button>
           </div>
         </form>

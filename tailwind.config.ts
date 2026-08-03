@@ -76,13 +76,7 @@ const config: Config = {
   		}
   	}
   },
-  plugins: [
-    animate,
-    function ({ addVariant }: { addVariant: (name: string, selector: string) => void }) {
-      // 黑白主题 variant：当 html 元素带有 .monochrome 类时生效
-      addVariant('monochrome', '.monochrome &');
-    }
-  ],
+  plugins: [animate],
 };
 
 export default config;

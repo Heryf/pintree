@@ -23,7 +23,6 @@ import Link from "next/link";
 import { Switch } from "@/components/ui/switch";
 import { Check, ChevronsUpDown, Folder } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { TagInput } from "./TagInput";
 import {
   Command,
   CommandEmpty,
@@ -87,7 +86,6 @@ export function CreateBookmarkDialog({
     isFeatured: false,
     sortOrder: 0
   });
-  const [tags, setTags] = useState<string[]>([]);
 
   // 添加新的状态来跟踪是否已获取信息
   const [hasLoadedInfo, setHasLoadedInfo] = useState(false);
@@ -136,7 +134,6 @@ export function CreateBookmarkDialog({
         isFeatured: false,
         sortOrder: 0
       });
-      setTags([]);
     }
   }, [open, defaultCollectionId, defaultFolderId]);
 
@@ -151,7 +148,6 @@ export function CreateBookmarkDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          tags,
           folderId: formData.folderId === "none" ? null : formData.folderId
         }),
       });
@@ -159,7 +155,7 @@ export function CreateBookmarkDialog({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "创建书签失败");
+        setError(data.error || "Create bookmark failed");
         return;
       }
 
@@ -178,10 +174,9 @@ export function CreateBookmarkDialog({
         isFeatured: false,
         sortOrder: 0
       });
-      setTags([]);
     } catch (error) {
       console.error("Create bookmark failed:", error);
-      setError("创建书签失败，请重试");
+      setError("Create bookmark failed, please try again");
     } finally {
       setLoading(false);
     }
@@ -240,14 +235,14 @@ export function CreateBookmarkDialog({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>新建书签</DialogTitle>
+            <DialogTitle>New Bookmark</DialogTitle>
           </DialogHeader>
           
           <Alert>
             <AlertDescription>
-              请先创建一个书签合集。
+              Please create a collection first.
               <Link href="/admin/collections" className="ml-2 text-blue-600 hover:underline">
-                去创建
+                Go to create
               </Link>
             </AlertDescription>
           </Alert>
@@ -260,7 +255,7 @@ export function CreateBookmarkDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>新建书签</DialogTitle>
+          <DialogTitle>New Bookmark</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -271,7 +266,7 @@ export function CreateBookmarkDialog({
           )}
           
           <div className="space-y-2">
-            <Label>文件夹</Label>
+            <Label>Folder</Label>
             <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -280,15 +275,15 @@ export function CreateBookmarkDialog({
                   aria-expanded={popoverOpen}
                   className="w-full justify-between"
                 >
-                  {folders.find(f => f.id === formData.folderId)?.displayName || "选择文件夹"}
+                  {folders.find(f => f.id === formData.folderId)?.displayName || "Select a folder"}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
                 <Command>
-                  <CommandInput placeholder="搜索文件夹..." />
+                  <CommandInput placeholder="Search folders..." />
                   <CommandList>
-                    <CommandEmpty>未找到文件夹</CommandEmpty>
+                    <CommandEmpty>No folders found</CommandEmpty>
                     <CommandGroup>
                       <CommandItem
                         onSelect={() => {
@@ -302,7 +297,7 @@ export function CreateBookmarkDialog({
                             !formData.folderId ? "opacity-100" : "opacity-0"
                           )}
                         />
-                        <span>根目录</span>
+                        <span>Root</span>
                       </CommandItem>
                       {folders.map((folder) => (
                         <CommandItem
@@ -330,7 +325,7 @@ export function CreateBookmarkDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>链接地址</Label>
+            <Label>URL</Label>
             <Input
               type="url"
               value={formData.url}
@@ -346,7 +341,7 @@ export function CreateBookmarkDialog({
           {hasLoadedInfo && (
             <>
               <div className="space-y-2">
-                <Label>标题</Label>
+                <Label>Title</Label>
                 <Input
                   value={formData.title}
                   onChange={(e) =>
@@ -357,7 +352,7 @@ export function CreateBookmarkDialog({
               </div>
 
               <div className="space-y-2">
-                <Label>描述</Label>
+                <Label>Description</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) =>
@@ -367,7 +362,7 @@ export function CreateBookmarkDialog({
               </div>
 
               <div className="space-y-2">
-                <Label>图标链接</Label>
+                <Label>Icon URL</Label>
                 <div className="flex gap-2">
                   <div className="flex-1">
                     <Input
@@ -421,19 +416,15 @@ export function CreateBookmarkDialog({
             </>
           )}
 
-          <div className="flex items-center space-x-2">
+          {/* <div className="flex items-center space-x-2">
             <Switch
               checked={formData.isFeatured}
               onCheckedChange={(checked) =>
                 setFormData((prev) => ({ ...prev, isFeatured: checked }))
               }
             />
-            <Label>精选</Label>
-          </div>
-
-          {hasLoadedInfo && (
-            <TagInput value={tags} onChange={setTags} />
-          )}
+            <Label>Featured</Label>
+          </div> */}
 
           <div className="flex justify-end gap-2">
             <Button
@@ -444,21 +435,21 @@ export function CreateBookmarkDialog({
                 onOpenChange(false);
               }}
             >
-              取消
+              Cancel
             </Button>
-            <Button
-              type="submit"
+            <Button 
+              type="submit" 
               disabled={loading}
               onClick={async (e) => {
                 e.preventDefault();
-
+                
                 if (!formData.url) {
-                  setError("请输入链接地址");
+                  setError("Please enter a URL");
                   return;
                 }
 
                 if (!isValidUrl(formData.url)) {
-                  setError("请输入有效的链接地址，例如 https://example.com");
+                  setError("Please enter a valid URL, e.g. https://example.com");
                   return;
                 }
 
@@ -470,13 +461,13 @@ export function CreateBookmarkDialog({
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ url: formData.url }),
                     });
-
+                    
                     const data: UrlInfo = await response.json();
-
+                    
                     if (!response.ok) {
-                      throw new Error(data.error || "获取链接信息失败");
+                      throw new Error(data.error || "获取URL信息失败");
                     }
-
+                    
                     setFormData(prev => ({
                       ...prev,
                       title: data.title || prev.title,
@@ -487,7 +478,7 @@ export function CreateBookmarkDialog({
                     setHasLoadedInfo(true);
                   } catch (error) {
                     console.error("Failed to get URL information:", error);
-                    setError(error instanceof Error ? error.message : "获取链接信息失败");
+                    setError(error instanceof Error ? error.message : "Failed to get URL information");
                   } finally {
                     setLoading(false);
                   }
@@ -496,7 +487,7 @@ export function CreateBookmarkDialog({
                 }
               }}
             >
-              {loading ? "获取中..." : (hasLoadedInfo ? "创建" : "获取信息")}
+              {loading ? "Getting..." : (hasLoadedInfo ? "Create" : "Get Info")}
             </Button>
           </div>
         </form>

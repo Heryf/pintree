@@ -36,7 +36,7 @@ import { Skeleton } from "../ui/skeleton";
 const menuItems = [
   {
     href: "/admin/collections",
-    label: "书签合集",
+    label: "合集管理",
     icon: Library,
   },
   {
@@ -46,16 +46,16 @@ const menuItems = [
   },
   {
     href: "/admin/settings",
-    label: "设置",
+    label: "系统设置",
     icon: Settings,
     subItems: [
       {
         href: "/admin/settings/basic",
-        label: "基本设置",
+        label: "基础设置",
       },
       {
         href: "/admin/settings/seo",
-        label: "SEO 设置",
+        label: "SEO设置",
       },
     ]
   },
@@ -114,7 +114,7 @@ export function AdminSidebar() {
                   <>
                     <SidebarMenuButton
                       onClick={() => toggleExpand(item.href)}
-                      className="w-full flex items-center justify-between rounded-xl hover:bg-gray-200/50 active:bg-gray-200/50"
+                      className="w-full flex items-center justify-between rounded-xl"
                     >
                       <div className="flex items-center gap-2">
                         <item.icon className="h-4 w-4" />
@@ -135,7 +135,7 @@ export function AdminSidebar() {
                             asChild
                             isActive={pathname === subItem.href}
                             size="sm"
-                            className="text-sm text-muted-foreground hover:bg-gray-200/50 active:bg-gray-200/50"
+                            className="text-sm"
                           >
                             <Link href={subItem.href}>
                               {subItem.label}
@@ -150,7 +150,7 @@ export function AdminSidebar() {
                     asChild
                     isActive={pathname === item.href}
                   >
-                    <Link href={item.href} className="flex items-center gap-2 rounded-xl hover:bg-gray-200/50 active:bg-gray-200/50">
+                    <Link href={item.href} className="flex items-center gap-2 rounded-xl">
                       <item.icon className="h-4 w-4" />
                       {item.label}
                     </Link>

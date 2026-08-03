@@ -10,7 +10,7 @@ export const defaultSettings: SettingItem[] = [
   // 基础设置
   {
     key: "websiteName",
-    value: "Pizza",
+    value: "Pintree",
     type: "string",
     group: "basic",
     description: "网站名称"
@@ -31,7 +31,7 @@ export const defaultSettings: SettingItem[] = [
   },
   {
     key: "copyrightText",
-    value: "© 2026 Pizza. 保留所有权利。",
+    value: "© 2024 Pintree. All rights reserved.",
     type: "string",
     group: "basic",
     description: "版权信息"
@@ -113,35 +113,35 @@ export const defaultSettings: SettingItem[] = [
   // SEO设置
   {
     key: "siteTitle",
-    value: "Pizza - 智能书签管理与分享平台",
+    value: "Pintree - Smart Bookmark Management & Organization Platform",
     type: "string",
     group: "seo",
     description: "网站标题"
   },
   {
     key: "description",
-    value: "使用 Pizza 高效地整理、管理和分享你的书签。支持自定义合集、标签分类、暗色模式，让网络资源井井有条。",
+    value: "Organize, manage and share your bookmarks efficiently with Pintree. Features AI-powered organization, custom collections, and seamless bookmark sharing for enhanced productivity.",
     type: "string",
     group: "seo",
     description: "网站描述"
   },
   {
     key: "keywords",
-    value: "书签管理, 书签整理, 书签合集, 书签分享, 效率工具, 网站导航, 链接管理, 书签标签, 在线书签",
+    value: "bookmark manager, bookmark organizer, bookmark collections, bookmark sharing, productivity tools, website organization, link management, bookmark tags, AI bookmarking, digital organization",
     type: "string",
     group: "seo",
     description: "关键词(用逗号分隔)"
   },
   {
     key: "siteUrl",
-    value: "https://zbbsnm.icu",
+    value: "https://pintree.io",
     type: "string",
     group: "seo",
     description: "网站URL"
   },
   {
     key: "ogImage",
-    value: "https://zbbsnm.icu/og-image.png",
+    value: "https://pintree.io/og-image.png",
     type: "string",
     group: "seo",
     description: "社交分享图片"
@@ -200,41 +200,6 @@ export const defaultSettings: SettingItem[] = [
 
   // 功能设置
   {
-    key: "defaultTheme",
-    value: "light",
-    type: "string",
-    group: "feature",
-    description: "默认主题：light、dark、monochrome"
-  },
-  {
-    key: "bookmarkStyle",
-    value: "default",
-    type: "string",
-    group: "feature",
-    description: "书签卡片样式：default、glass"
-  },
-  {
-    key: "showBookmarkUrl",
-    value: "true",
-    type: "boolean",
-    group: "feature",
-    description: "显示书签链接"
-  },
-  {
-    key: "showBookmarkDescription",
-    value: "true",
-    type: "boolean",
-    group: "feature",
-    description: "显示书签说明"
-  },
-  {
-    key: "wallpaperUrl",
-    value: "",
-    type: "string",
-    group: "feature",
-    description: "壁纸图片 URL"
-  },
-  {
     key: "enableSearch",
     value: "true",
     type: "boolean",
@@ -271,14 +236,14 @@ export const defaultSettings: SettingItem[] = [
   },
   {
     key: "ctaButtonText",
-    value: "获取你的 Pizza",
+    value: "Claim your Pintree",
     type: "string",
     group: "feature",
     description: "CTA按钮文字"
   },
   {
     key: "ctaButtonLink",
-    value: "https://zbbsnm.icu",
+    value: "https://pintree.io",
     type: "string",
     group: "feature",
     description: "CTA按钮链接"
@@ -299,14 +264,14 @@ export const defaultSettings: SettingItem[] = [
   },
   {
     key: "heroBannerTitle",
-    value: "轻松整理与分享你的书签",
+    value: "Organize and Share Your Bookmarks Effortlessly",
     type: "string",
     group: "feature",
     description: "Hero Banner标题"
   },
   {
     key: "heroBannerDescription",
-    value: "使用 Pizza 创建、管理并分享个性化的书签合集",
+    value: "Create, manage and share personalized bookmark collections with Pintree",
     type: "string",
     group: "feature",
     description: "Hero Banner描述"
@@ -320,21 +285,21 @@ export const defaultSettings: SettingItem[] = [
   },
   {
     key: "heroBannerButtonText",
-    value: "开始使用",
+    value: "Pintree.io",
     type: "string",
     group: "feature",
     description: "Hero Banner按钮文字"
   },
   {
     key: "heroBannerButtonLink",
-    value: "https://zbbsnm.icu",
+    value: "https://pintree.io",
     type: "string",
     group: "feature",
     description: "Hero Banner按钮链接"
   },
   {
     key: "heroBannerSponsorText",
-    value: "赞助商",
+    value: "Sponsored by",
     type: "string",
     group: "feature",
     description: "Hero Banner赞助商文本"
@@ -390,7 +355,7 @@ export const defaultSettings: SettingItem[] = [
   },
   {
     key: "carouselImageHyperlinks",
-    value: "https://zbbsnm.icu|https://zbbsnm.icu|https://zbbsnm.icu|https://zbbsnm.icu|https://zbbsnm.icu|https://zbbsnm.icu",
+    value: "https://pintree.io|https://pintree.io|https://pintree.io|https://pintree.io|https://pintree.io|https://pintree.io",
     type: "json",
     group: "feature",
     description: "轮播图片跳转链接"
@@ -404,42 +369,42 @@ export const defaultSettings: SettingItem[] = [
   },
   {
     key: "topBannerTitle",
-    value: "Pizza 上线啦",
+    value: "Pintree 1.0 Launched",
     type: "string",
     group: "feature",
     description: "Banner标题"
   },
   {
     key: "topBannerDescription",
-    value: "一款帮助你收集、整理和分享常用网站的书签管理工具。",
+    value: "A bookmark manager that helps you collect, organize, and share your favorite websites.",
     type: "string",
     group: "feature",
     description: "Banner描述"
   },
   {
     key: "topBannerButtonText",
-    value: "了解更多",
+    value: "Learn More",
     type: "string",
     group: "feature",
     description: "Banner按钮文本"
   },
   {
     key: "topBannerButtonLink",
-    value: "https://zbbsnm.icu",
+    value: "https://github.com/Pintree-io/pintree",
     type: "string",
     group: "feature",
     description: "Banner按钮链接"
   },
   {
     key: "sidebarAdsTitle",
-    value: "整理你的书签",
+    value: "Organize Your Bookmarks",
     type: "string",
     group: "feature",
     description: "侧边栏广告标题"
   },
   {
     key: "sidebarAdsDescription",
-    value: "Pizza 帮你以优雅的方式收集、整理和分享常用网站",
+    value: "Pintree helps you collect, organize and share your favorite websites in a beautiful way",
     type: "string",
     group: "feature",
     description: "侧边栏广告描述"
@@ -453,14 +418,14 @@ export const defaultSettings: SettingItem[] = [
   },
   {
     key: "sidebarAdsButtonText",
-    value: "开始使用",
+    value: "Get Started",
     type: "string",
     group: "feature",
     description: "侧边栏广告按钮文本"
   },
   {
     key: "sidebarAdsButtonUrl",
-    value: "https://zbbsnm.icu",
+    value: "https://github.com/Pintree-io/pintree",
     type: "string",
     group: "feature",
     description: "侧边栏广告按钮链接"

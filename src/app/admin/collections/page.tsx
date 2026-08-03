@@ -30,23 +30,27 @@ export default function CollectionsPage() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <AdminHeader title="书签合集">
-        <Button
-          onClick={() => setIsCreateDialogOpen(true)}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          新建合集
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => setIsImportDialogOpen(true)}
-        >
-          <Upload className="w-4 h-4 mr-2" />
-          导入
-        </Button>
+      <AdminHeader title="合集管理">
+        {(
+          <>
+            <Button
+              onClick={() => setIsCreateDialogOpen(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              新建合集
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsImportDialogOpen(true)}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              导入合集
+            </Button>
+          </>
+        )}
       </AdminHeader>
 
-      <main className="flex-1 overflow-y-auto p-8 bg-card/50">
+      <main className="flex-1 overflow-y-auto p-8 bg-background">
         <CollectionList key={key} onCollectionsChange={handleCollectionsChange} />
 
         <CreateCollectionDialog

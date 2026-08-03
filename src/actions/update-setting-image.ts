@@ -74,24 +74,17 @@ export async function updateSettingImage(formData: FormData) {
 
   const existingImageId = imageId || setting.images[0]?.imageId;
 
+  if (!existingImageId) {
+    throw new Error(`Could not find the corresponding image: ${settingKey}`);
+  }
+
   // const validatedData = SettingImageSchema.parse({ 
   //   settingKey, 
   //   file, 
   //   imageId: existingImageId 
   // });
 
-  const uploadedImage = await uploadImage(file, existingImageId || undefined);
-
-  // 如果该设置项之前没有关联图片，则创建 SettingImage 关联
-  if (!existingImageId) {
-    await prisma.settingImage.create({
-      data: {
-        settingId: setting.id,
-        imageId: uploadedImage.id,
-        description: `Setting image: ${file.name}`,
-      },
-    });
-  }
+  const uploadedImage = await uploadImage(file, existingImageId);
 
 
 

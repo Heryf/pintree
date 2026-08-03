@@ -299,14 +299,14 @@ export default function BookmarksPage() {
         </div>
 
         {/* 表格骨架屏 */}
-        <div className="rounded-lg border border-gray-200">
+        <div className="rounded-lg border border-border">
           {/* 表头 */}
-          <div className="border-b border-gray-200 bg-gray-50/40">
+          <div className="border-b border-border bg-muted/40">
             <Skeleton className="h-12 w-full" />
           </div>
-          
+
           {/* 表格内容 */}
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-border">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-center p-4 gap-4">
                 <Skeleton className="h-8 w-8 rounded-full" /> {/* 图标 */}
@@ -333,7 +333,7 @@ export default function BookmarksPage() {
   return (
     <div className="flex-1 flex flex-col">
       <AdminHeader 
-        title="书签管理"
+        title="书签"
         action={
           <Select
             value={selectedCollectionId}
@@ -401,7 +401,7 @@ export default function BookmarksPage() {
               </svg>
               <h3 className="mt-4 text-lg font-semibold">暂无书签合集</h3>
               <p className="mb-4 mt-2 text-sm text-muted-foreground">
-                请先创建一个书签合集，然后再添加书签。
+                请先创建书签合集，然后添加书签。
               </p>
               <Button asChild>
                 <Link href="/admin/collections">
@@ -418,19 +418,19 @@ export default function BookmarksPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleFolderBack(-1)}
-                className={!currentFolderId ? "bg-white" : ""}
+                className={!currentFolderId ? "bg-muted" : ""}
                 disabled={isNavigating}
               >
                 根目录
               </Button>
               {folderPath.map((folder, index) => (
                 <Fragment key={folder.id}>
-                  <ChevronRight className="w-4 h-4 text-gray-500" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleFolderBack(index)}
-                    className={currentFolderId === folder.id ? "bg-white" : ""}
+                    className={currentFolderId === folder.id ? "bg-muted" : ""}
                     disabled={isNavigating}
                   >
                     {folder.name}
@@ -459,7 +459,7 @@ export default function BookmarksPage() {
                   </svg>
                   <h3 className="mt-4 text-lg font-semibold">暂无内容</h3>
                   <p className="mb-4 mt-2 text-sm text-muted-foreground">
-                    当前文件夹暂无内容，开始添加你的第一个书签或文件夹吧。
+                    当前文件夹没有内容。开始添加您的第一个书签或文件夹吧。
                   </p>
                   <div className="flex gap-2">
                     <Button onClick={() => setIsCreateDialogOpen(true)}>

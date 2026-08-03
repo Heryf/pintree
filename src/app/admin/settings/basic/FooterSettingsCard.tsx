@@ -23,29 +23,29 @@ const FooterSettingsCard = ({
 }: FooterSettingsCardProps) => {
 
   return (
-    <Card className="border bg-white">
-      <CardHeader className="border-b">
-        <CardTitle>页脚设置</CardTitle>
+    <Card>
+      <CardHeader className="border-b border-border">
+        <CardTitle>Footer Settings</CardTitle>
         <CardDescription>
-          设置网站的页脚信息
+          Set the footer information of your website
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4 p-6">
         {/* 版权信息 */}
         <div className="grid gap-2">
-          <Label htmlFor="copyrightText">版权信息</Label>
+          <Label htmlFor="copyrightText">Copyright Information</Label>
           <Input
             id="copyrightText"
             name="copyrightText"
             value={settings.copyrightText}
             onChange={handleChange}
-            placeholder="© 2024 您的公司名称。保留所有权利。"
+            placeholder="© 2024 Your Company. All rights reserved."
           />
         </div>
 
         {/* 联系邮箱 */}
         <div className="grid gap-2">
-          <Label htmlFor="contactEmail">联系邮箱</Label>
+          <Label htmlFor="contactEmail">Contact Email</Label>
           <Input
             id="contactEmail"
             name="contactEmail"

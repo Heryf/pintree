@@ -65,7 +65,7 @@ export function CreateCollectionDialog({
         toast({
           variant: "destructive",
           title: "创建失败",
-          description: data.error || "创建书签合集失败"
+          description: data.error || "创建合集失败"
         });
         return; // 直接返回，不关闭对话框
       }

@@ -1,11 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { Folder, Bookmark } from "@prisma/client";
-
-// 定义返回数据的类型
-interface FolderWithItems extends Folder {
-  items: Array<(Folder | Bookmark) & { type: 'folder' | 'bookmark' }>;
-}
 
 export async function GET(
   request: Request,
@@ -17,15 +11,9 @@ export async function GET(
     const folderId = searchParams.get("folderId");
     const sortField = searchParams.get("sortField") || "sortOrder";
     const sortOrder = searchParams.get("sortOrder") || "asc";
-    const pageSize = parseInt(searchParams.get("pageSize") || "100");
 
-    // 并行执行书签总数查询和当前书签查询
-    const [totalBookmarks, currentBookmarks] = await Promise.all([
-      prisma.bookmark.count({
-        where: {
-          collectionId: id,
-        }
-      }),
+    // 并行执行：当前层级书签 + 当前层级子文件夹
+    const [currentBookmarks, subfoldersRaw] = await Promise.all([
       prisma.bookmark.findMany({
         where: {
           collectionId: id,
@@ -45,14 +33,9 @@ export async function GET(
               name: true,
             },
           },
-          tags: true,
         },
-      })
-    ]);
-
-    // 获取子文件夹及其内容
-    const subfolders = await Promise.all(
-      (await prisma.folder.findMany({
+      }),
+      prisma.folder.findMany({
         where: {
           collectionId: id,
           parentId: folderId || null
@@ -60,40 +43,29 @@ export async function GET(
         orderBy: {
           [sortField]: sortOrder as 'asc' | 'desc',
         },
-      })).map(async (folder) => {
-        // 并行获取文件夹内的书签、子文件夹和总书签数
-        const [bookmarks, childFolders, bookmarkCount] = await Promise.all([
-          prisma.bookmark.findMany({
-            where: {
-              folderId: folder.id
-            },
-            ...(pageSize ? { take: pageSize } : {}),
-            orderBy: {
-              [sortField]: sortOrder as 'asc' | 'desc',
-            }
-          }),
-          prisma.folder.findMany({
-            where: {
-              parentId: folder.id
-            },
-            orderBy: {
-              [sortField]: sortOrder as 'asc' | 'desc',
-            },
-          }),
+      })
+    ]);
+
+    // 获取每个子文件夹的统计信息
+    const subfolders = await Promise.all(
+      subfoldersRaw.map(async (folder) => {
+        const [bookmarkCount, childFolderCount] = await Promise.all([
           prisma.bookmark.count({
             where: {
               folderId: folder.id
+            }
+          }),
+          prisma.folder.count({
+            where: {
+              parentId: folder.id
             }
           })
         ]);
 
         return {
           ...folder,
-          items: [
-            ...childFolders.map(f => ({ ...f, type: 'folder' as const })),
-            ...bookmarks.map(b => ({ ...b, type: 'bookmark' as const }))
-          ],
-          bookmarkCount
+          bookmarkCount,
+          childFolderCount
         };
       })
     );

@@ -111,7 +111,7 @@ export function EditFolderDialog({
       onSuccess?.();
     } catch (error) {
       console.error("Update folder failed:", error);
-      alert(error instanceof Error ? error.message : "更新文件夹失败");
+      alert(error instanceof Error ? error.message : "Update folder failed");
     } finally {
       setLoading(false);
     }
@@ -121,15 +121,15 @@ export function EditFolderDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>编辑文件夹</DialogTitle>
+          <DialogTitle>Edit Folder</DialogTitle>
           <DialogDescription>
-            修改文件夹属性和设置
+            Modify folder properties and settings
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>名称</Label>
+            <Label>Name</Label>
             <Input
               value={formData.name || ""}
               onChange={(e) =>
@@ -140,7 +140,7 @@ export function EditFolderDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>图标链接</Label>
+            <Label>Icon URL</Label>
             <Input
               value={formData.icon}
               onChange={(e) =>
@@ -151,7 +151,7 @@ export function EditFolderDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>排序</Label>
+            <Label>Sort Order</Label>
             <Input
               type="number"
               value={formData.sortOrder}
@@ -168,7 +168,7 @@ export function EditFolderDialog({
                 setFormData((prev) => ({ ...prev, isPublic: checked }))
               }
             />
-            <Label>公开访问</Label>
+            <Label>Public Access</Label>
           </div>
 
           {!formData.isPublic && (
@@ -180,13 +180,13 @@ export function EditFolderDialog({
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, password: e.target.value }))
                 }
-                placeholder="设置访问密码"
+                placeholder="Set access password"
               />
             </div>
           )}
 
           <div className="space-y-2">
-            <Label>父文件夹</Label>
+            <Label>Parent Folder</Label>
             <Select
               value={formData.parentId}
               onValueChange={(value) =>
@@ -194,10 +194,10 @@ export function EditFolderDialog({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="选择父文件夹" />
+                <SelectValue placeholder="Select Parent Folder" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="root">根目录</SelectItem>
+                <SelectItem value="root">Root</SelectItem>
                 {folders.map((f) => (
                   <SelectItem key={f.id} value={f.id}>
                     {f.name}
@@ -213,10 +213,10 @@ export function EditFolderDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              取消
+              Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "保存中..." : "保存"}
+              {loading ? "Saving..." : "Save"}
             </Button>
           </div>
         </form>

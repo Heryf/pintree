@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { TagInput } from "./TagInput";
 
 interface Collection {
   id: string;
@@ -35,7 +34,6 @@ interface EditBookmarkDialogProps {
     isFeatured: boolean;
     collectionId: string;
     icon?: string;
-    tags?: { name: string }[];
   };
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -67,9 +65,6 @@ export function EditBookmarkDialog({
     isFeatured: bookmark.isFeatured,
     icon: bookmark.icon || "",
   });
-  const [tags, setTags] = useState<string[]>(
-    bookmark.tags?.map((t) => t.name) || []
-  );
   const [availableIcons, setAvailableIcons] = useState<string[]>([]);
 
   useEffect(() => {
@@ -102,7 +97,6 @@ export function EditBookmarkDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          tags,
           icon: formData.icon || null,
           description: formData.description || null,
         }),
@@ -126,7 +120,7 @@ export function EditBookmarkDialog({
       onSuccess?.();
     } catch (error) {
       console.error("Update bookmark failed:", error);
-      setError(error instanceof Error ? error.message : "更新书签失败");
+      setError(error instanceof Error ? error.message : "Update bookmark failed");
     } finally {
       setLoading(false);
     }
@@ -143,12 +137,12 @@ export function EditBookmarkDialog({
 
   const handleGetInfo = async () => {
     if (!formData.url) {
-      setError("请输入链接地址");
+      setError("Please enter a URL");
       return;
     }
 
     if (!isValidUrl(formData.url)) {
-      setError("请输入有效的链接地址，例如 https://example.com");
+      setError("Please enter a valid URL, e.g. https://example.com");
       return;
     }
 
@@ -159,13 +153,13 @@ export function EditBookmarkDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: formData.url }),
       });
-
+      
       const data: UrlInfo = await response.json();
-
+      
       if (!response.ok) {
-        throw new Error(data.error || "获取链接信息失败");
+        throw new Error(data.error || "Failed to get URL information");
       }
-
+      
       setFormData(prev => ({
         ...prev,
         title: data.title || prev.title,
@@ -175,7 +169,7 @@ export function EditBookmarkDialog({
       setAvailableIcons(data.icons || []);
     } catch (error) {
       console.error("Failed to get URL information:", error);
-      setError(error instanceof Error ? error.message : "获取链接信息失败");
+      setError(error instanceof Error ? error.message : "Failed to get URL information");
     } finally {
       setLoading(false);
     }
@@ -185,7 +179,7 @@ export function EditBookmarkDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>编辑书签</DialogTitle>
+          <DialogTitle>Edit Bookmark</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -196,15 +190,15 @@ export function EditBookmarkDialog({
           )}
 
           <div className="space-y-2">
-            <Label>书签合集</Label>
+            <Label>Collection</Label>
             <Select
               value={formData.collectionId}
-              onValueChange={(value) =>
+              onValueChange={(value) => 
                 setFormData(prev => ({ ...prev, collectionId: value }))
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="选择合集" />
+                <SelectValue placeholder="Select collection" />
               </SelectTrigger>
               <SelectContent>
                 {collections?.map((collection) => (
@@ -217,7 +211,7 @@ export function EditBookmarkDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>链接地址</Label>
+            <Label>URL</Label>
             <div className="flex gap-2">
               <Input
                 type="url"
@@ -233,13 +227,13 @@ export function EditBookmarkDialog({
                 onClick={handleGetInfo}
                 disabled={loading}
               >
-                {loading ? "获取中..." : "获取信息"}
+                {loading ? "Getting..." : "Get Info"}
               </Button>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>标题</Label>
+            <Label>Title</Label>
             <Input
               value={formData.title}
               onChange={(e) =>
@@ -250,7 +244,7 @@ export function EditBookmarkDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>描述</Label>
+            <Label>Description</Label>
             <Textarea
               value={formData.description}
               onChange={(e) =>
@@ -260,7 +254,7 @@ export function EditBookmarkDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>图标链接</Label>
+            <Label>Icon URL</Label>
             <div className="flex gap-2">
               <div className="flex-1">
                 <Input
@@ -312,28 +306,16 @@ export function EditBookmarkDialog({
             )}
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={formData.isFeatured}
-              onCheckedChange={(checked) =>
-                setFormData((prev) => ({ ...prev, isFeatured: checked }))
-              }
-            />
-            <Label>精选</Label>
-          </div>
-
-          <TagInput value={tags} onChange={setTags} />
-
           <div className="flex justify-end gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              取消
+              Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "保存中..." : "保存"}
+              {loading ? "Saving..." : "Save"}
             </Button>
           </div>
         </form>

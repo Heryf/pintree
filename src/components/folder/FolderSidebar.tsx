@@ -169,7 +169,7 @@ export function FolderSidebar({
           }}
         >
           <SelectTrigger>
-            <SelectValue placeholder="选择合集" />
+            <SelectValue placeholder="Select collection" />
           </SelectTrigger>
           <SelectContent>
             {collections && Array.isArray(collections) && collections?.map((collection) => (

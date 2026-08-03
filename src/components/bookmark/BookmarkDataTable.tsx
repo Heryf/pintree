@@ -159,7 +159,7 @@ export function BookmarkDataTable({
   if (isNavigating) {
     return (
       <div className="flex items-center justify-center h-32">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
   }
@@ -167,22 +167,22 @@ export function BookmarkDataTable({
   if (tableData.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">暂无数据</p>
+        <p className="text-muted-foreground">No items found</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border bg-white">
+      <div className="rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>标题</TableHead>
-              <TableHead>图标</TableHead>
-              <TableHead>图标链接</TableHead>
-              <TableHead>描述</TableHead>
-              <TableHead>浏览量</TableHead>
+              <TableHead>Title</TableHead>
+              <TableHead>Icon</TableHead>
+              <TableHead>Icon URL</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>View Count</TableHead>
               <TableHead>
                 <Button
                   variant="ghost"
@@ -192,7 +192,7 @@ export function BookmarkDataTable({
                     onSortChange("createdAt", newOrder);
                   }}
                 >
-                  创建时间
+                  Created At
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
@@ -205,11 +205,11 @@ export function BookmarkDataTable({
                     onSortChange("updatedAt", newOrder);
                   }}
                 >
-                  更新时间
+                  Updated At
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
-              <TableHead>操作</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -240,7 +240,7 @@ export function BookmarkDataTable({
                       <img 
                         src={item.icon} 
                         alt="icon" 
-                        className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                        className="w-8 h-8 rounded-full object-cover border border-border"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none'
                         }}
@@ -249,7 +249,7 @@ export function BookmarkDataTable({
                   )}
                 </TableCell>
                 <TableCell>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-muted-foreground">
                     {item.type === "bookmark" ? item.icon || '-' : '-'}
                   </span>
                 </TableCell>
@@ -304,7 +304,7 @@ function TableActions({ item, onUpdate }: { item: TableItem; onUpdate: () => voi
       setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error("Delete failed:", error);
-      alert(`删除失败：${error instanceof Error ? error.message : '未知错误'}`);
+      alert(`Delete failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -318,13 +318,13 @@ function TableActions({ item, onUpdate }: { item: TableItem; onUpdate: () => voi
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
-            编辑
+            Edit
           </DropdownMenuItem>
-          <DropdownMenuItem
+          <DropdownMenuItem 
             onClick={() => setIsDeleteDialogOpen(true)}
             className="text-red-600"
           >
-            删除
+            Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -351,9 +351,9 @@ function TableActions({ item, onUpdate }: { item: TableItem; onUpdate: () => voi
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>删除{item.type === "folder" ? "文件夹" : "书签"}</DialogTitle>
+            <DialogTitle>Delete {item.type === "folder" ? "folder" : "bookmark"}</DialogTitle>
             <DialogDescription>
-              确定要删除"{item.title}"这个{item.type === "folder" ? "文件夹" : "书签"}吗？此操作无法撤销。
+              Are you sure you want to delete "{item.title}" this {item.type === "folder" ? "folder" : "bookmark"}? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -361,13 +361,13 @@ function TableActions({ item, onUpdate }: { item: TableItem; onUpdate: () => voi
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
             >
-              取消
+              Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={handleDelete}
             >
-              删除
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>

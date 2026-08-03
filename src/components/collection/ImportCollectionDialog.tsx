@@ -63,7 +63,7 @@ export function ImportCollectionDialog({
         toast({
           variant: "destructive",
           title: "文件过大",
-          description: "请选择小于 5MB 的 JSON 文件",
+          description: "请选择小于5MB的JSON文件",
         });
       }
     },
@@ -94,21 +94,41 @@ export function ImportCollectionDialog({
 
       const startTime = Date.now();
 
-      if (jsonData.metadata?.exportedFrom === "Pintree") {
+      if (jsonData.metadata?.exportedFrom === "Pintree" || jsonData.metadata?.exportedFrom === "PintreePro") {
         batchSize = 50
         // Import folders first
         const folderLevels = Object.keys(jsonData.folders)
           .map(Number)
           .sort((a, b) => a - b);
 
+        // Maintain name -> tempId map for parent folder resolution
+        const nameToTempId: Record<string, string> = {};
+
         for (const level of folderLevels) {
           const folderBatches = jsonData.folders[level];
 
           for (const folderBatch of folderBatches) {
+            // Resolve parentTempId from path for sub-folders
+            const resolvedFolders = folderBatch.map((folder: any) => {
+              if (folder.path && folder.path.length > 0) {
+                const parentName = folder.path[folder.path.length - 1];
+                const parentTempId = nameToTempId[parentName];
+                if (parentTempId) {
+                  return { ...folder, parentTempId };
+                }
+              }
+              return folder;
+            });
+
+            // Update nameToTempId with current batch folders
+            resolvedFolders.forEach((folder: any) => {
+              nameToTempId[folder.name] = folder.tempId;
+            });
+
             const folderRequestData = {
               name: formData.name,
               description: formData.description,
-              folders: folderBatch,
+              folders: resolvedFolders,
               collectionId: importedCollectionId, // Will be null for the first batch
               folderMap: folderMap, // Pass existing folder mapping
             };
@@ -144,7 +164,7 @@ export function ImportCollectionDialog({
             // Show folder import progress
             toast({
               title: "文件夹导入进度",
-              description: `正在导入第 ${level} 层文件夹：第 ${folderBatches.indexOf(folderBatch) + 1}/${folderBatches.length} 批`,
+              description: `正在导入第 ${level} 层文件夹: 第 ${folderBatches.indexOf(folderBatch) + 1}/${folderBatches.length} 批`,
             });
           }
         }
@@ -188,12 +208,32 @@ export function ImportCollectionDialog({
           toast({
             title: "书签导入进度",
             description: `已导入 ${Math.min(i + batchSize, totalBookmarks)}/${totalBookmarks} 个书签
-             （${batchDuration.toFixed(2)}秒，预计剩余 ${estimatedRemainingTime.toFixed(2)}秒）`,
+              （耗时${batchDuration.toFixed(2)}秒，预计剩余${estimatedRemainingTime.toFixed(2)}秒）`,
           });
         } 
 
         // Import completed
       } else {
+        // Validate JSON format before processing
+        if (!Array.isArray(jsonData)) {
+          toast({
+            variant: "destructive",
+            title: "导入失败",
+            description: "JSON格式无效：需要浏览器书签导出文件（Chrome/Firefox JSON）",
+          });
+          setLoading(false);
+          return;
+        }
+        if (!jsonData[0] || !jsonData[0].children) {
+          toast({
+            variant: "destructive",
+            title: "导入失败",
+            description: "书签格式无效：缺少 'children' 属性。请使用 Chrome 或 Firefox 的书签导出文件。",
+          });
+          setLoading(false);
+          return;
+        }
+
         const flattenedBookmarks = createFlattenBookmarks(jsonData[0].children);
         const totalBookmarks = flattenedBookmarks.length;
         for (let i = 0; i < totalBookmarks; i += batchSize) {
@@ -236,10 +276,10 @@ export function ImportCollectionDialog({
             title: "导入进度",
             description: `第 ${
               Math.floor(i / batchSize) + 1
-            } 批已导入（${batchDuration.toFixed(2)}秒）。
+            } 批已导入（耗时${batchDuration.toFixed(2)}秒）。
           预计剩余时间：${estimatedRemainingTime.toFixed(
             2
-          )}秒（剩余 ${remainingBatches} 批）`,
+          )}秒（剩余${remainingBatches}批）`,
           });
 
           if (!response.ok) {
@@ -279,7 +319,7 @@ export function ImportCollectionDialog({
         title: "导入成功",
         description: `合集"${
           formData.name
-        }"已成功导入，耗时 ${totalImportTime.toFixed(2)}秒`,
+        }"已在${totalImportTime.toFixed(2)}秒内导入成功`,
       });
 
       if (onSuccess) {
@@ -340,7 +380,7 @@ export function ImportCollectionDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="file">选择 JSON 文件（最大 5MB）</Label>
+            <Label htmlFor="file">选择JSON文件（最大5MB）</Label>
             <div
               {...getRootProps()}
               className={`
@@ -363,8 +403,9 @@ export function ImportCollectionDialog({
                     </span>
                   ) : (
                     <>
-                      <span className="font-medium">点击上传</span> 或拖拽文件到此处
-                      <p className="text-xs">支持 JSON 格式文件</p>
+                      <span className="font-medium">点击上传</span> 或
+                      拖拽文件到此处
+                      <p className="text-xs">支持JSON文件</p>
                     </>
                   )}
                 </div>

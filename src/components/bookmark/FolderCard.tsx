@@ -1,59 +1,253 @@
 "use client";
 
+import { useState } from "react";
 import { Folder } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface FolderCardProps {
   name: string;
   icon?: string;
-  onClick: () => void;
   bookmarkCount?: number;
+  childFolderCount?: number;
+  onClick: () => void;
 }
 
-export function FolderCard({ name, icon, onClick, bookmarkCount }: FolderCardProps) {
+export function FolderCard({
+  name,
+  bookmarkCount = 0,
+  childFolderCount = 0,
+  onClick,
+}: FolderCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  // 格式化计数显示
+  const getCountText = () => {
+    const parts = [];
+    if (childFolderCount > 0) parts.push(`${childFolderCount} 个文件夹`);
+    if (bookmarkCount > 0) parts.push(`${bookmarkCount} 个书签`);
+    if (parts.length === 0) return "空文件夹";
+    return parts.join(" · ");
+  };
+
   return (
     <button
       onClick={onClick}
-      className={cn(
-        "group relative flex flex-col items-center justify-center p-6 rounded-2xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 w-full aspect-square",
-        // 亮色：绿色系
-        "border-emerald-100 bg-gradient-to-br from-emerald-50 to-emerald-100/50 hover:from-emerald-100 hover:to-emerald-200/50",
-        // 暗色：绿色系
-        "dark:border-emerald-900/30 dark:from-emerald-950/30 dark:to-emerald-900/20 dark:hover:from-emerald-900/40 dark:hover:to-emerald-800/30",
-        // 黑白主题：使用中性色，避免绿色
-        "monochrome:border-white/10 monochrome:from-white/10 monochrome:to-white/5 monochrome:hover:from-white/15 monochrome:hover:to-white/10"
-      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="group flex flex-col items-center gap-3 w-full text-left transition-all duration-300 ease-out"
     >
-      {icon ? (
-        <img src={icon} alt={name} className="w-14 h-14 mb-4 object-contain" />
-      ) : (
-        <div className={cn(
-          "w-14 h-14 mb-4 rounded-2xl flex items-center justify-center",
-          "bg-emerald-500/20 dark:bg-emerald-500/10",
-          "monochrome:bg-white/10"
-        )}>
-          <Folder className={cn(
-            "w-8 h-8 text-emerald-600 dark:text-emerald-400",
-            "monochrome:text-white/90"
-          )} />
-        </div>
-      )}
-      <span className={cn(
-        "text-sm font-medium truncate w-full text-center",
-        "text-emerald-900 dark:text-emerald-100",
-        "monochrome:text-white/90"
-      )}>
-        {name}
-      </span>
-      {typeof bookmarkCount === "number" && (
-        <span className={cn(
-          "mt-2 text-xs",
-          "text-emerald-600/70 dark:text-emerald-400/70",
-          "monochrome:text-white/50"
-        )}>
-          {bookmarkCount} 个书签
+      {/* 文件夹图标 - 精致SVG设计 */}
+      <div className="relative w-full aspect-[4/3] max-w-[140px]">
+        <svg
+          viewBox="0 0 140 100"
+          className="w-full h-full drop-shadow-md transition-all duration-300"
+          style={{
+            filter: isHovered
+              ? "drop-shadow(0 8px 16px rgba(0,0,0,0.15)) drop-shadow(0 2px 4px rgba(0,0,0,0.1))"
+              : "drop-shadow(0 2px 6px rgba(0,0,0,0.08))",
+          }}
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            {/* 文件夹主体渐变 */}
+            <linearGradient id="folderBody" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={isHovered ? "#34d399" : "#6ee7b7"} />
+              <stop offset="100%" stopColor={isHovered ? "#059669" : "#10b981"} />
+            </linearGradient>
+            {/* 文件夹盖子渐变 */}
+            <linearGradient id="folderTab" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={isHovered ? "#4b5563" : "#6b7280"} />
+              <stop offset="100%" stopColor={isHovered ? "#374151" : "#4b5563"} />
+            </linearGradient>
+            {/* 纸张阴影 */}
+            <filter id="paperShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.1" />
+            </filter>
+          </defs>
+
+          {/* 文件夹后层（主体） */}
+          <rect
+            x="12"
+            y="28"
+            width="116"
+            height="64"
+            rx="10"
+            fill="url(#folderBody)"
+            className="transition-all duration-300"
+          />
+
+          {/* 文件夹底部圆角遮罩 - 确保只有底部圆角 */}
+          <rect
+            x="12"
+            y="28"
+            width="116"
+            height="14"
+            fill="url(#folderBody)"
+            className="transition-all duration-300"
+          />
+
+          {/* 文件夹 tab（标签页） */}
+          <path
+            d="M12 32 C12 25.37 17.37 20 24 20 L52 20 L62 12 L108 12 C114.63 12 120 17.37 120 24 L120 32 Z"
+            fill="url(#folderTab)"
+            className="transition-all duration-300"
+          />
+
+          {/* tab 高光 */}
+          <path
+            d="M14 30 C14 25.58 18.58 22 24 22 L52 22 L61 14 L108 14 C113.42 14 118 18.58 118 24 L118 30"
+            stroke="white"
+            strokeWidth="1"
+            opacity="0.15"
+            fill="none"
+            className="transition-all duration-300"
+          />
+
+          {/* 文件夹前盖（盖子主体） */}
+          <rect
+            x="12"
+            y="24"
+            width="116"
+            height="68"
+            rx="10"
+            fill="url(#folderBody)"
+            opacity={isHovered ? "0.3" : "1"}
+            className="transition-all duration-500 ease-out"
+          />
+
+          {/* 前盖底部圆角遮罩 */}
+          <rect
+            x="12"
+            y="24"
+            width="116"
+            height="14"
+            fill="url(#folderBody)"
+            opacity={isHovered ? "0.3" : "1"}
+            className="transition-all duration-500 ease-out"
+          />
+
+          {/* 盖子顶部高光线条 */}
+          <rect
+            x="22"
+            y="30"
+            width="50"
+            height="2"
+            rx="1"
+            fill="white"
+            opacity={isHovered ? "0.1" : "0.35"}
+            className="transition-all duration-300"
+          />
+
+          {/* 纸张组 - hover时展开 */}
+          <g
+            className="transition-all duration-500 ease-out"
+            style={{
+              transform: isHovered ? "translateY(-8px)" : "translateY(0)",
+              transformOrigin: "70px 60px",
+            }}
+          >
+            {/* 底层纸张 */}
+            <rect
+              x="22"
+              y={isHovered ? "14" : "32"}
+              width="96"
+              height="60"
+              rx="6"
+              fill="#f9fafb"
+              opacity={isHovered ? "0.7" : "0"}
+              className="transition-all duration-500 ease-out"
+              style={{
+                transform: isHovered ? "rotate(-2deg)" : "rotate(0deg)",
+                transformOrigin: "70px 60px",
+              }}
+            />
+
+            {/* 中层纸张 */}
+            <rect
+              x="24"
+              y={isHovered ? "10" : "32"}
+              width="92"
+              height="58"
+              rx="5"
+              fill="#f3f4f6"
+              opacity={isHovered ? "0.85" : "0"}
+              className="transition-all duration-500 ease-out"
+              style={{
+                transform: isHovered ? "rotate(1deg)" : "rotate(0deg)",
+                transformOrigin: "70px 60px",
+              }}
+            />
+
+            {/* 顶层纸张 */}
+            <rect
+              x="26"
+              y={isHovered ? "6" : "32"}
+              width="88"
+              height="56"
+              rx="5"
+              fill="white"
+              opacity={isHovered ? "0.95" : "0"}
+              filter="url(#paperShadow)"
+              className="transition-all duration-500 ease-out"
+            />
+
+            {/* 顶层纸张上的内容横线 */}
+            <rect
+              x="34"
+              y={isHovered ? "18" : "40"}
+              width="28"
+              height="2.5"
+              rx="1.25"
+              fill="#10b981"
+              opacity={isHovered ? "0.6" : "0"}
+              className="transition-all duration-500 ease-out"
+            />
+            <rect
+              x="34"
+              y={isHovered ? "26" : "48"}
+              width="44"
+              height="2"
+              rx="1"
+              fill="#d1d5db"
+              opacity={isHovered ? "0.5" : "0"}
+              className="transition-all duration-500 ease-out"
+            />
+            <rect
+              x="34"
+              y={isHovered ? "34" : "56"}
+              width="36"
+              height="2"
+              rx="1"
+              fill="#d1d5db"
+              opacity={isHovered ? "0.5" : "0"}
+              className="transition-all duration-500 ease-out"
+            />
+            <rect
+              x="34"
+              y={isHovered ? "42" : "64"}
+              width="24"
+              height="2"
+              rx="1"
+              fill="#d1d5db"
+              opacity={isHovered ? "0.35" : "0"}
+              className="transition-all duration-500 ease-out"
+            />
+          </g>
+        </svg>
+      </div>
+
+      {/* 文件夹名称和统计 */}
+      <div className="flex flex-col items-center text-center gap-1">
+        <span
+          className="text-sm font-semibold text-foreground truncate max-w-[130px] transition-colors duration-300 group-hover:text-primary"
+          title={name}
+        >
+          {name}
         </span>
-      )}
+        <span className="text-xs text-muted-foreground/80 leading-relaxed">
+          {getCountText()}
+        </span>
+      </div>
     </button>
   );
 }

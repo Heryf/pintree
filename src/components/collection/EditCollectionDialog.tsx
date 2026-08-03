@@ -69,8 +69,8 @@ export function EditCollectionDialog({
       if (!response.ok) {
         toast({
           variant: "destructive",
-          title: "更新失败",
-          description: data.error || "更新合集失败"
+          title: "Update Failed",
+          description: data.error || "Failed to update collection"
         });
         return;
       }
@@ -79,8 +79,8 @@ export function EditCollectionDialog({
       onUpdate?.();
 
       toast({
-        title: "更新成功",
-        description: "合集已更新"
+        title: "Update Successful",
+        description: "Collection has been updated"
       });
 
       if (window.location.pathname.includes('/admin/bookmarks')) {
@@ -92,8 +92,8 @@ export function EditCollectionDialog({
       console.error("Update failed:", error);
       toast({
         variant: "destructive",
-        title: "更新失败",
-        description: error instanceof Error ? error.message : "更新合集时发生错误"
+        title: "Update Failed",
+        description: error instanceof Error ? error.message : "An error occurred while updating the collection"
       });
     } finally {
       setLoading(false);
@@ -104,31 +104,31 @@ export function EditCollectionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>编辑书签合集</DialogTitle>
+          <DialogTitle>Edit Bookmark Collection</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">名称</Label>
+            <Label htmlFor="name">Name</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="输入合集名称"
+              placeholder="Enter collection name"
               disabled={loading}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">描述</Label>
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({
+              onChange={(e) => setFormData(prev => ({ 
                   ...prev,
-                description: e.target.value.slice(0, 140)
+                description: e.target.value.slice(0, 140) 
               }))}
-              placeholder="输入合集描述"
+              placeholder="Enter collection description"
               rows={3}
               className="resize-none"
               maxLength={140}
@@ -143,10 +143,10 @@ export function EditCollectionDialog({
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              取消
+              Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "保存中..." : "保存"}
+              {loading ? "Saving..." : "Save"}
             </Button>
           </div>
         </form>

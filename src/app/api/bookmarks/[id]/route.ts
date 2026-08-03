@@ -37,37 +37,18 @@ export async function PUT(
     }
 
     const data = await request.json();
-
-    // 构建更新数据
-    const updateData: any = {
-      title: data.title,
-      url: data.url,
-      description: data.description,
-      collectionId: data.collectionId,
-      isFeatured: data.isFeatured,
-      icon: data.icon,
-    };
-
-    // 处理标签更新：先断开所有，再重新关联
-    if (data.tags !== undefined) {
-      if (Array.isArray(data.tags) && data.tags.length > 0) {
-        updateData.tags = {
-          set: [],
-          connectOrCreate: data.tags.map((name: string) => ({
-            where: { name: name.trim() },
-            create: { name: name.trim() },
-          })),
-        };
-      } else {
-        updateData.tags = { set: [] };
-      }
-    }
-
     const bookmark = await prisma.bookmark.update({
       where: {
         id: params.id,
       },
-      data: updateData,
+      data: {
+        title: data.title,
+        url: data.url,
+        description: data.description,
+        collectionId: data.collectionId,
+        isFeatured: data.isFeatured,
+        icon: data.icon,
+      },
       include: {
         collection: {
           select: {
@@ -79,7 +60,6 @@ export async function PUT(
             name: true,
           },
         },
-        tags: true,
       },
     });
 

@@ -11,7 +11,7 @@ interface AdminHeaderProps {
 export function AdminHeader({ title, children, action }: AdminHeaderProps) {
   return (
     <div className="border-b">
-      <div className="flex h-16 items-center px-8 bg-white">
+      <div className="flex h-16 items-center px-8 bg-card">
         <SidebarTrigger>
           <Menu className="h-6 w-6" />
         </SidebarTrigger>
