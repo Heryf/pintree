@@ -6,6 +6,24 @@
 
 ---
 
+## 四轮修改（后台页持续异常根因定位与修复）
+
+### R4-1【高】后台页服务器异常根因：会话令牌校验失败 — 已定位并修复
+
+**根因**：用户反馈错误仅出现在后台页（/admin/*）且每次都出现。后台页每次请求执行 `requireAuth()` → `getServerSession()`；**next-auth v4 在会话令牌校验失败时（`NEXTAUTH_SECRET` 未在 Vercel 配置，或旧 cookie 由旧密钥签发）会直接抛异常**，而不是返回 null → 后台页每次都崩溃。本地测试无登录 cookie 走的是「无会话→跳转」路径，故无法复现。
+
+**修复**：
+- 新增 `getSessionSafe()`（`src/lib/auth/utils.ts`）：捕获会话校验异常并按「未登录」处理；`requireAuth()` 改用该函数，坏令牌 → 跳转登录（307），不再崩溃。
+- 全部 13 个调用 `getServerSession` 的 API 路由改用 `getSessionSafe()`，坏令牌 → 401 而非 500。
+- `src/lib/prisma.ts` 回滚上一轮的 `datasourceUrl` 改动（实测 Prisma 5.22 构造永不抛错，显式传 URL 反而引入新变量）。
+- `error.tsx` / `global-error.tsx`：错误页显示**真实错误信息**（便于线上直接读取定位）。
+
+**验证**：用错误密钥签发的令牌访问后台页 → 307 跳登录（修复前为崩溃）；正确密钥令牌 → 200 正常渲染。
+
+**部署必做**：在 Vercel 项目设置中配置环境变量 `NEXTAUTH_SECRET`（`openssl rand -base64 32` 生成）。配置后旧会话失效，需重新登录一次。
+
+---
+
 ## 三轮修改（部署反馈修复：异常、侧边栏、Logo、搜索栏）
 
 ### R3-1【高】服务器端异常进一步加固 — 已实施

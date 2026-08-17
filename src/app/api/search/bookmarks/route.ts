@@ -2,8 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { getSessionSafe } from "@/lib/auth/utils";
 
 function getSearchWhereClause(query: string, scope: string, collectionId: string | null, isAuthenticated: boolean) {
   const baseConditions = {
@@ -46,7 +45,7 @@ function getSearchWhereClause(query: string, scope: string, collectionId: string
 
 export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getSessionSafe();
     const { searchParams } = new URL(request.url);
     
     const query = searchParams.get("q");

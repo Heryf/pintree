@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 /**
  * 全局错误边界：捕获根布局（layout.tsx）抛出的异常。
  * Next.js 要求根布局的错误只能由 global-error.tsx 捕获，
@@ -12,6 +14,10 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    console.error("[全局错误]", error);
+  }, [error]);
+
   return (
     <html lang="zh-CN">
       <body>
@@ -37,6 +43,23 @@ export default function GlobalError({
           <p style={{ fontSize: "15px", opacity: 0.75, margin: 0 }}>
             服务器端发生异常（{error?.digest ? `错误码 ${error.digest}` : "请稍后重试"}）。
           </p>
+          {error?.message && (
+            <pre
+              style={{
+                maxWidth: "36rem",
+                overflow: "auto",
+                textAlign: "left",
+                fontSize: "12px",
+                background: "#fff",
+                border: "1px solid #e5e7eb",
+                borderRadius: "8px",
+                padding: "12px",
+                color: "#6b7280",
+              }}
+            >
+              {error.message}
+            </pre>
+          )}
           <button
             onClick={reset}
             style={{
@@ -56,3 +79,4 @@ export default function GlobalError({
     </html>
   );
 }
+
