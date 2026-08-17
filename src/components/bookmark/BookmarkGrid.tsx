@@ -1,14 +1,23 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { BookmarkCard } from "./BookmarkCard";
 import { FolderCard } from "./FolderCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronRight, FolderOpen, LayoutGrid, List } from "lucide-react";
+import { ChevronRight, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { SearchBar } from "@/components/search/SearchBar";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+
+// 代码分割：搜索栏（含多引擎 SVG）按需加载，降低首屏 JS 体积
+const SearchBar = dynamic(
+  () => import("@/components/search/SearchBar").then((m) => m.SearchBar),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-12 w-full max-w-[600px] rounded-full" />,
+  }
+);
 
 interface BookmarkGridProps {
   collectionId: string;
@@ -43,41 +52,6 @@ interface BreadcrumbItem {
   name: string;
 }
 
-/** 列表模式下的紧凑书签行 */
-function BookmarkRow({ bookmark }: { bookmark: Bookmark }) {
-  const [imageError, setImageError] = useState(false);
-  const defaultIcon = '/assets/default-icon.svg';
-  const cleanUrl = (bookmark.url || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
-
-  return (
-    <div
-      onClick={() => window.open(bookmark.url, '_blank')}
-      className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/60 bg-card/60 px-4 py-2.5 transition-colors hover:border-border hover:bg-card"
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={imageError ? defaultIcon : (bookmark.icon || defaultIcon)}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        className="h-6 w-6 flex-shrink-0 rounded-md object-cover"
-        onError={() => setImageError(true)}
-      />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="truncate text-sm font-medium text-foreground">{bookmark.title}</span>
-          {bookmark.isFeatured && (
-            <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-              精选
-            </span>
-          )}
-        </div>
-        <p className="truncate text-xs text-muted-foreground/60">{cleanUrl}</p>
-      </div>
-    </div>
-  );
-}
-
 export function BookmarkGrid({
   collectionId,
   currentFolderId,
@@ -103,24 +77,8 @@ export function BookmarkGrid({
   const [totalResults, setTotalResults] = useState(0);
   const [currentEngine, setCurrentEngine] = useState("书签");
   const [enableSearch, setEnableSearch] = useState(true);
-  // 视图模式（网格/列表），通过 localStorage 记忆用户选择
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
-    if (typeof window !== "undefined") {
-      return window.localStorage.getItem("pintree-view-mode") === "list" ? "list" : "grid";
-    }
-    return "grid";
-  });
   // 搜索请求序号：丢弃过期响应，避免快速输入时旧结果覆盖新结果
   const searchSeqRef = useRef(0);
-
-  const handleViewModeChange = (mode: "grid" | "list") => {
-    setViewMode(mode);
-    try {
-      window.localStorage.setItem("pintree-view-mode", mode);
-    } catch (error) {
-      // localStorage 不可用时静默降级，不影响功能
-    }
-  };
 
   const routeToFolderInCollection = (collectionSlug: string, folderId?: string) => {
     const currentSearchParams = new URLSearchParams(searchParams.toString());
@@ -291,44 +249,6 @@ export function BookmarkGrid({
         </div>
       )}
 
-      {/* 视图切换（网格/列表），选择持久化到 localStorage */}
-      {!isSearching && !searchResults.length && !inputValue && (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-card/60 p-0.5">
-            <button
-              type="button"
-              onClick={() => handleViewModeChange("grid")}
-              aria-label="网格视图"
-              aria-pressed={viewMode === "grid"}
-              className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors",
-                viewMode === "grid"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <LayoutGrid className="h-4 w-4" />
-              <span className="hidden sm:inline">网格</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleViewModeChange("list")}
-              aria-label="列表视图"
-              aria-pressed={viewMode === "list"}
-              className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors",
-                viewMode === "list"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <List className="h-4 w-4" />
-              <span className="hidden sm:inline">列表</span>
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* 面包屑导航 */}
       {currentFolderId && !searchResults.length && !inputValue && (
         <nav className="flex items-center space-x-1 py-2">
@@ -383,26 +303,18 @@ export function BookmarkGrid({
                 搜索结果
                 <span className="text-sm font-normal text-muted-foreground">({totalResults})</span>
               </h2>
-              {viewMode === "list" ? (
-                <div className="space-y-2">
-                  {searchResults.map((bookmark) => (
-                    <BookmarkRow key={bookmark.id} bookmark={bookmark} />
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-5">
-                  {searchResults.map((bookmark) => (
-                    <BookmarkCard
-                      key={bookmark.id}
-                      title={bookmark.title}
-                      url={bookmark.url}
-                      description={bookmark.description}
-                      icon={bookmark.icon}
-                      isFeatured={bookmark.isFeatured}
-                    />
-                  ))}
-                </div>
-              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-5">
+                {searchResults.map((bookmark) => (
+                  <BookmarkCard
+                    key={bookmark.id}
+                    title={bookmark.title}
+                    url={bookmark.url}
+                    description={bookmark.description}
+                    icon={bookmark.icon}
+                    isFeatured={bookmark.isFeatured}
+                  />
+                ))}
+              </div>
             </div>
           ) : inputValue ? (
             <div className="text-center text-muted-foreground py-16">
@@ -445,26 +357,18 @@ export function BookmarkGrid({
                   {subfolders.length > 0 && (
                     <div className="h-px bg-border/50 my-6" />
                   )}
-                  {viewMode === "list" ? (
-                    <div className="space-y-2">
-                      {currentBookmarks.map((bookmark) => (
-                        <BookmarkRow key={bookmark.id} bookmark={bookmark} />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-5">
-                      {currentBookmarks.map((bookmark) => (
-                        <BookmarkCard
-                          key={bookmark.id}
-                          title={bookmark.title}
-                          url={bookmark.url}
-                          description={bookmark.description}
-                          icon={bookmark.icon}
-                          isFeatured={bookmark.isFeatured}
-                        />
-                      ))}
-                    </div>
-                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-5">
+                    {currentBookmarks.map((bookmark) => (
+                      <BookmarkCard
+                        key={bookmark.id}
+                        title={bookmark.title}
+                        url={bookmark.url}
+                        description={bookmark.description}
+                        icon={bookmark.icon}
+                        isFeatured={bookmark.isFeatured}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
 

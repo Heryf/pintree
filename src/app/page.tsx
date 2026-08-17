@@ -13,7 +13,7 @@ import { GetStarted } from "@/components/website/get-started";
 import { BackToTop } from "@/components/website/back-to-top";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { Collection } from "@prisma/client";
+import type { Collection } from "@prisma/client";
 
 /** 首屏加载骨架屏：模拟侧边栏 + 搜索栏 + 卡片网格，避免白屏/转圈 */
 function HomeSkeleton() {

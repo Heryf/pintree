@@ -6,6 +6,44 @@
 
 ---
 
+## 二轮修改（2024 部署反馈修复）
+
+### R2-1【高】服务器端异常（Application error）处理 — 已实施
+
+**排查结论**：本机已模拟多种 Vercel 场景（未配置 `NEXTAUTH_SECRET`、未配置 `NEXTAUTH_URL`、数据库不可达），页面均能优雅降级（200/307），说明布局与设置读取已 fail-open。该异常发生在部署环境，根因需以 **Vercel 函数日志** 为准（Digest `2277247120` 与日志中的堆栈一一对应）。同时补齐了 Next.js 官方要求的错误边界，避免任何根布局异常再以裸错误页呈现：
+
+**修改**：
+- 新增 `src/app/global-error.tsx`：捕获根布局异常（Next.js 规定根布局错误只能由它捕获），显示友好提示 + 重试按钮 + 错误码。
+- 新增 `src/app/error.tsx`：捕获页面级异常，同样提供友好提示与重试。
+- `src/app/layout.tsx` 加固：
+  - `Analytics`/`GoogleAnalytics` 移入 `<body>`（原结构位于 `<html>` 之外，HTML 不合法，存在渲染风险）；
+  - Google Analytics ID 增加格式校验（`G-XXXX`），后台误填非法值不再影响整站渲染；
+  - 元数据标题改为优先读取 `siteTitle`。
+
+**从 Vercel 日志定位根因**：
+1. Vercel 控制台 → 项目 → **Logs**（或 Deployment → 对应部署 → Logs）；
+2. 搜索 `2277247120`（或报错时间点），查看该行前后的**堆栈跟踪**；
+3. 常见根因对照：数据库连接（`DATABASE_URL`）、设置值非法（如统计代码/图片）、超时（函数 30s 上限，见 `vercel.json`）。
+
+### R2-2【高】移除“网格/列表”视图切换栏 — 已实施
+
+**修改**：`src/components/bookmark/BookmarkGrid.tsx` 删除视图切换器、列表视图（`BookmarkRow`）及 localStorage 记忆逻辑，统一使用网格展示；保留搜索防抖、过期响应丢弃、响应式边距等优化。
+
+### R2-3【中】左上角 Logo 区显示逻辑 — 已实施
+
+**修改**：
+- `src/components/website/sidebar.tsx`：左上角文本改为优先读取后台 SEO 设置 `siteTitle`，回退 `websiteName`，再回退 `PinTree` —— 只保留 Logo 图标 + 系统标题，不再与浏览器标签页标题重复。
+- `src/app/layout.tsx`：浏览器 `<title>` 同步改为 `siteTitle`（回退 `websiteName`/默认值），全站标题来源统一。
+
+### R2-4【中】首屏性能（代码分割 + 类型优化）— 已实施
+
+**修改**：
+- `BookmarkGrid` 中搜索栏改为 `next/dynamic` 按需加载（`ssr: false`，加载期显示骨架），多引擎内联 SVG 不再进入首屏 JS；
+- `src/app/page.tsx` 的 `@prisma/client` 改为 `import type`，避免 Prisma 运行时被打进浏览器包。
+- 效果：首页 First Load JS **190 kB → 184 kB**，页面 JS **19.8 kB → 14.2 kB**；配合上轮图片懒加载与接口 Cache-Control，首屏请求数与体积进一步下降。
+
+---
+
 ## 一、响应速度优化（Performance）
 
 ### 1.1 【高】首页/侧边栏 N+1 查询修复 — 已实施

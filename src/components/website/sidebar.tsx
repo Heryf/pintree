@@ -59,7 +59,9 @@ export function WebsiteSidebar({
 
   const { images, isLoading } = useSettingImages("logoUrl");
   const { settings } = useSettings("basic");
-  const websiteName = settings?.websiteName || "PinTree";
+  const { settings: seoSettings } = useSettings("seo");
+  // 左上角仅保留 Logo + 后台配置的系统标题（siteTitle），回退 websiteName / 默认值
+  const websiteName = seoSettings?.siteTitle || settings?.websiteName || "PinTree";
 
   // 获取书签集合列表
   useEffect(() => {

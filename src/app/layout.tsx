@@ -10,14 +10,17 @@ import { getSiteSettings } from "@/lib/settings";
 import type { Metadata } from 'next'
 import { GoogleAnalytics } from '@next/third-parties/google'
 
-const SETTINGS_KEYS = ["websiteName", "description", "keywords", "siteUrl", "faviconUrl", "ogImage"];
+const SETTINGS_KEYS = ["siteTitle", "websiteName", "description", "keywords", "siteUrl", "faviconUrl", "ogImage"];
+
+// 校验 Google Analytics ID 格式（G-XXXX），防止后台误填非法值导致页面异常
+function isValidGAId(id: string): boolean {
+  return /^G-[A-Z0-9]{4,}$/i.test(id.trim());
+}
 
 export const generateMetadata = async (): Promise<Metadata> => {
   try {
     const { settings, map } = await getSiteSettings(SETTINGS_KEYS);
 
-    // const faviconBase =
-    //   settingsMap.faviconUrl?.replace("favicon.ico", "") || "/favicon/";
     const siteUrl =
       map.siteUrl ||
       process.env.NEXT_PUBLIC_APP_URL ||
@@ -35,8 +38,14 @@ export const generateMetadata = async (): Promise<Metadata> => {
       faviconUrl = faviconImage ? `${imageBaseUrl}${faviconImage.imageId}` : faviconUrl;
     }
 
+    // 系统标题优先取后台 SEO 设置的 siteTitle，回退 websiteName，最后用默认值
+    const siteTitle =
+      map.siteTitle ||
+      map.websiteName ||
+      "Pintree - Smart Bookmark Management & Organization Platform";
+
     return {
-      title: map.websiteName,
+      title: siteTitle,
       description: map.description,
       keywords: map.keywords,
       metadataBase: new URL(siteUrl),
@@ -79,7 +88,7 @@ export default async function RootLayout({
   };
 
   if (process.env.NODE_ENV === "production") {
-    // 获取统计代码ID（getSiteSettings 内部已做请求级缓存去重）
+    // 获取统计代码ID（getSiteSettings 内部已做请求级缓存去重，异常时自动回退空值）
     const { map } = await getSiteSettings(["googleAnalyticsId", "clarityId"]);
     analyticsMap = {
       googleAnalyticsId: map.googleAnalyticsId || "",
@@ -104,9 +113,11 @@ export default async function RootLayout({
           <Toaster />
           <SonnerToaster />
         </ThemeProvider>
+        <Analytics clarityId={analyticsMap.clarityId} />
+        {isValidGAId(analyticsMap.googleAnalyticsId) && (
+          <GoogleAnalytics gaId={analyticsMap.googleAnalyticsId.trim()} />
+        )}
       </body>
-      <Analytics clarityId={analyticsMap.clarityId} />
-      {!!analyticsMap.googleAnalyticsId && <GoogleAnalytics gaId={analyticsMap.googleAnalyticsId} />}
     </html>
   );
 }
