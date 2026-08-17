@@ -6,82 +6,39 @@ import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { Analytics } from "@/components/analytics/Analytics";
 import { Toaster as SonnerToaster } from "sonner";
-import { defaultSettings } from "@/lib/defaultSettings";
-import { cache } from 'react'
-import type { Metadata, ResolvingMetadata } from 'next'
+import { getSiteSettings } from "@/lib/settings";
+import type { Metadata } from 'next'
 import { GoogleAnalytics } from '@next/third-parties/google'
 
-async function checkSiteSettingTableExists() {
-  const result: any = await prisma.$queryRaw`
-    SELECT EXISTS (
-      SELECT FROM information_schema.tables 
-      WHERE  table_schema = 'public'
-      AND    table_name   = 'SiteSetting'
-    );
-  `;
-  return result[0].exists;
-}
+const SETTINGS_KEYS = ["websiteName", "description", "keywords", "siteUrl", "faviconUrl", "ogImage"];
 
-type Props = {
-  params: Promise<{ id: string }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}
-
-export const generateMetadata = async (
-  { params, searchParams }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> => {
+export const generateMetadata = async (): Promise<Metadata> => {
   try {
-    const tableExists = await checkSiteSettingTableExists();
-    const keys = ["websiteName", "description", "keywords", "siteUrl", "faviconUrl", "ogImage"];
-    let settings: any;
-    if (tableExists) {
-      settings = await prisma.siteSetting.findMany({
-        where: {
-          key: {
-            in: [...keys],
-          },
-        },
-      });
-    } 
-
-    // console.log(settings)
-
-    settings = settings.length > 0 ? settings : defaultSettings.filter((setting) =>
-      keys.includes(setting.key)
-    );
-
-    const settingsMap = settings.reduce((acc: any, setting: any) => {
-      acc[setting.key] = setting.value;
-      return acc;
-    }, {} as Record<string, string>);
+    const { settings, map } = await getSiteSettings(SETTINGS_KEYS);
 
     // const faviconBase =
     //   settingsMap.faviconUrl?.replace("favicon.ico", "") || "/favicon/";
     const siteUrl =
-      settingsMap.siteUrl ||
+      map.siteUrl ||
       process.env.NEXT_PUBLIC_APP_URL ||
       "http://localhost:3000";
 
-
     const imageBaseUrl = '/api/images/'
 
-
     const faviconSetting = settings.find((setting: any) => setting.key === 'faviconUrl');
-    const faviconId = faviconSetting ? 
-      (await prisma.settingImage.findFirst({
+    let faviconUrl = '/favicon/favicon.ico';
+    if (faviconSetting?.id) {
+      const faviconImage = await prisma.settingImage.findFirst({
         where: { settingId: faviconSetting.id },
         select: { imageId: true }
-      }))?.imageId || '' : '';
-    const faviconUrl = faviconId ? `${imageBaseUrl}${faviconId}` : '/favicon/favicon.ico'
+      });
+      faviconUrl = faviconImage ? `${imageBaseUrl}${faviconImage.imageId}` : faviconUrl;
+    }
 
     return {
-      title:
-        settingsMap.websiteName,
-      description:
-        settingsMap.description,
-      keywords:
-        settingsMap.keywords,
+      title: map.websiteName,
+      description: map.description,
+      keywords: map.keywords,
       metadataBase: new URL(siteUrl),
       alternates: {
         canonical: siteUrl,
@@ -93,33 +50,6 @@ export const generateMetadata = async (
             sizes: "32x32",
             type: "image/x-icon",
           },
-          // {
-          //   url: `${faviconBase}favicon-16x16.png`,
-          //   sizes: "16x16",
-          //   type: "image/png",
-          // },
-          // {
-          //   url: `${faviconBase}favicon-32x32.png`,
-          //   sizes: "32x32",
-          //   type: "image/png",
-          // },
-          // {
-          //   url: `${faviconBase}favicon-192x192.png`,
-          //   sizes: "192x192",
-          //   type: "image/png",
-          // },
-          // {
-          //   url: `${faviconBase}favicon-512x512.png`,
-          //   sizes: "512x512",
-          //   type: "image/png",
-          // },
-        // apple: [
-        //   {
-        //     url: `${faviconBase}favicon-180x180.png`,
-        //     sizes: "180x180",
-        //     type: "image/png",
-        //   },
-        // ],
         ],
       },
     };
@@ -149,28 +79,25 @@ export default async function RootLayout({
   };
 
   if (process.env.NODE_ENV === "production") {
-    const tableExists = await checkSiteSettingTableExists();
-    if (tableExists) {
-      // 获取统计代码ID
-      const analytics = await prisma.siteSetting.findMany({
-        where: {
-          key: {
-            in: ["googleAnalyticsId", "clarityId"],
-          },
-        },
-      });
-
-      if (analytics.length > 0) {
-        analyticsMap = analytics.reduce((acc, setting) => {
-          acc[setting.key] = setting.value || "";
-          return acc;
-        }, {} as Record<string, string>);
-      }
-    }
+    // 获取统计代码ID（getSiteSettings 内部已做请求级缓存去重）
+    const { map } = await getSiteSettings(["googleAnalyticsId", "clarityId"]);
+    analyticsMap = {
+      googleAnalyticsId: map.googleAnalyticsId || "",
+      clarityId: map.clarityId || "",
+    };
   }
 
   return (
     <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        {/* 预加载主题，避免暗色模式闪烁（FOUC） */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("pintree-theme");if(t==="dark"||t==="light"){document.documentElement.classList.toggle("dark",t==="dark");}else if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches){document.documentElement.classList.add("dark");}}catch(e){}})();`,
+          }}
+        />
+        <meta name="color-scheme" content="light dark" />
+      </head>
       <body suppressHydrationWarning>
         <ThemeProvider>
           <SessionProvider>{children}</SessionProvider>

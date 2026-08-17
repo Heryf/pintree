@@ -2,6 +2,39 @@ import { NextResponse } from "next/server";
 import * as cheerio from "cheerio";
 import type { CheerioAPI } from "cheerio";
 
+/**
+ * SSRF 防护：仅允许 http/https，并拦截内网/保留地址，
+ * 防止利用该接口探测内部网络（如云元数据服务 169.254.169.254）。
+ */
+function isBlockedUrl(url: URL): boolean {
+  if (url.protocol !== "http:" && url.protocol !== "https:") return true;
+
+  const hostname = url.hostname.toLowerCase();
+  if (hostname === "localhost" || hostname.endsWith(".localhost")) return true;
+
+  // IPv4 字面量检查
+  const ipv4 = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (ipv4) {
+    const a = parseInt(ipv4[1], 10);
+    const b = parseInt(ipv4[2], 10);
+    if (a === 10) return true;                    // 10.0.0.0/8
+    if (a === 127) return true;                   // 127.0.0.0/8
+    if (a === 0) return true;                     // 0.0.0.0/8
+    if (a === 169 && b === 254) return true;      // 169.254.0.0/16 (含云元数据)
+    if (a === 172 && b >= 16 && b <= 31) return true; // 172.16.0.0/12
+    if (a === 192 && b === 168) return true;      // 192.168.0.0/16
+    if (a === 100 && b >= 64 && b <= 127) return true; // 100.64.0.0/10 CGNAT
+    if (a >= 224) return true;                    // 组播/保留
+  }
+
+  // IPv6 环回 / 本地链路 / ULA（简化判断）
+  if (hostname === "::1" || hostname.startsWith("fe80:") || hostname.startsWith("fc") || hostname.startsWith("fd")) {
+    return true;
+  }
+
+  return false;
+}
+
 async function checkUrl(url: string) {
   try {
     const response = await fetch(url, {
@@ -126,7 +159,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid URL format" }, { status: 400 });
     }
 
-    const domain = new URL(url).hostname;
+    const parsedUrl = new URL(url);
+    if (isBlockedUrl(parsedUrl)) {
+      return NextResponse.json({ error: "URL is not allowed" }, { status: 400 });
+    }
+
+    const domain = parsedUrl.hostname;
 
     try {
       const response = await fetch(url, {

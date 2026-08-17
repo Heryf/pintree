@@ -6,6 +6,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     --background: 0 0% 100%;
     --foreground: 220 15% 15%;
     --card: 0 0% 100%;
@@ -42,6 +43,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     --background: 220 20% 10%;
     --foreground: 210 15% 92%;
     --card: 220 15% 14%;
@@ -84,6 +86,23 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* 暗色模式下的文本选区颜色 */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.25);
+  }
+}
+
+/* 滚动条配色跟随应用主题（非系统主题） */
+.dark {
+  scrollbar-color: hsl(220 15% 30%) transparent;
+}
+
+:root {
+  scrollbar-color: hsl(220 10% 80%) transparent;
+}
+
+html {
+  scrollbar-width: thin;
 }
 .hide-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */

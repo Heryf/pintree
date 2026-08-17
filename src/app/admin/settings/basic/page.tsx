@@ -67,12 +67,10 @@ export default function BasicSettingsPage() {
         const response = await fetch("/api/settings?group=basic");
         if (!response.ok) {
           const errorData = await response.json();
-          console.error("Load settings failed:", errorData); // 调试日志
           throw new Error(errorData.error || "Load settings failed");
         }
 
         const data = await response.json();
-        console.log("Loaded settings:", data); // 调试日志
 
         const sanitizedData = Object.keys(data).reduce(
           (acc, key) => ({
@@ -111,8 +109,7 @@ export default function BasicSettingsPage() {
     e.preventDefault();
     try {
       setLoading(true);
-      console.log("Submitted settings for tab:", activeTab); // 调试日志
-  
+
       const saveSettingPromises = [];
   
       // 根据当前标签页筛选需要保存的设置项
@@ -184,12 +181,9 @@ export default function BasicSettingsPage() {
         }).then(async response => {
           if (!response.ok) {
             const errorData = await response.json();
-            console.error("API error response:", errorData);
             throw new Error(errorData.error || "Save failed");
           }
           return response.json();
-        }).then(result => {
-          console.log("Save success:", result); // 调试日志
         })
       );
   

@@ -24,6 +24,8 @@ model Collection {
   bookmarks   Bookmark[]                          // 书签
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
+  @@index([isPublic, sortOrder])  // 公开合集列表查询加速
 }
 
 // 文件夹模型
@@ -42,6 +44,10 @@ model Folder {
   bookmarks   Bookmark[]  // 书签
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
+  @@index([collectionId, parentId])  // 按合集+父级查询子文件夹（最常用路径）
+  @@index([collectionId])            // 按合集查询全部文件夹
+  @@index([parentId])                // 按父级递归查询
 }
 
 // 书签模型
@@ -61,6 +67,11 @@ model Bookmark {
   tags        Tag[]       
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
+  @@index([collectionId, folderId])  // 按合集+文件夹查询书签（最常用路径）
+  @@index([collectionId])            // 按合集统计/查询
+  @@index([folderId])                // 按文件夹统计/查询
+  @@index([updatedAt])               // 搜索/列表按更新时间排序
 }
 
 // 标签模型
@@ -97,6 +108,9 @@ model AccessLog {
   userAgent   String                               // 访问者浏览器信息
   path        String                               // 访问的页面路径
   createdAt   DateTime  @default(now())            // 访问时间
+
+  @@index([createdAt])  // 按时间范围查询/清理日志
+  @@index([path])       // 按页面路径统计
 }
 
 

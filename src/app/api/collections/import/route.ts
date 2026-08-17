@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import pLimit from "p-limit";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -18,6 +20,12 @@ interface FlattenedBookmarkItem {
 
 export async function POST(request: NextRequest) {
   try {
+    // 权限校验：只有登录管理员才能导入数据
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { name, description, bookmarks, collectionId, folderMap } =
       await request.json();
 

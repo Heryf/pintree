@@ -1,6 +1,5 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "@/lib/prisma";
 import { DefaultSession } from "next-auth";
 
 // 扩展 Session 类型
@@ -13,7 +12,14 @@ declare module "next-auth" {
 }
 
 export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET || "QmJBzzN86SFfUw4MNRg6e3AngucQZhjMP/sOfvqeP6M=",
+  // 必须通过环境变量提供密钥（见 .env.example）。
+  // 开发环境未设置时 NextAuth 会打印警告并使用开发默认值；
+  // 生产环境未设置时 NextAuth 会在运行时抛出明确错误，避免使用可预测的硬编码密钥。
+  secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 60 * 24 * 7, // 会话有效期 7 天
+  },
   providers: [
     CredentialsProvider({
       name: "Email Password",
@@ -29,7 +35,13 @@ export const authOptions: NextAuthOptions = {
         const adminEmail = process.env.ADMIN_EMAIL;
         const adminPassword = process.env.ADMIN_PASSWORD;
 
-        if (credentials.email !== adminEmail || credentials.password !== adminPassword) {
+        // 使用常量时间比较，降低时序攻击风险
+        const emailMatches =
+          adminEmail && safeEqual(credentials.email, adminEmail);
+        const passwordMatches =
+          adminPassword && safeEqual(credentials.password, adminPassword);
+
+        if (!emailMatches || !passwordMatches) {
           throw new Error("Email or password is incorrect");
         }
 
@@ -43,12 +55,20 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async session({ session, token }) {
-      console.log('Session callback:', { session, token }); // 调试日志
       return session;
     },
     async jwt({ token, user }) {
-      console.log('JWT callback:', { token, user }); // 调试日志
       return token;
     },
   }
 };
+
+/** 常量时间字符串比较，避免早期返回导致时序侧信道 */
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}

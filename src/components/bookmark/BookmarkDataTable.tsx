@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Star, ExternalLink, Folder, ChevronLeft, ArrowUpDown } from "lucide-react";
+import { MoreHorizontal, Star, ExternalLink, Folder, ChevronLeft, ArrowUpDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -108,11 +109,6 @@ export function BookmarkDataTable({
   const safeBookmarks = Array.isArray(currentBookmarks) ? currentBookmarks : [];
   const safeFolders = Array.isArray(folders) ? folders : [];
 
-  console.log('Raw bookmarks:', bookmarks);
-  console.log('Safe bookmarks:', safeBookmarks);
-  console.log('Raw folders:', folders);
-  console.log('Safe folders:', safeFolders);
-
   const tableData = [
     ...safeFolders.map(folder => ({
       id: folder.id,
@@ -140,8 +136,6 @@ export function BookmarkDataTable({
       collectionId: bookmark.collectionId
     }))
   ];
-
-  console.log('Processed tableData:', tableData);
 
   if (loading) {
     return (
@@ -280,16 +274,18 @@ export function BookmarkDataTable({
 function TableActions({ item, onUpdate }: { item: TableItem; onUpdate: () => void }) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
     try {
+      setIsDeleting(true);
       const endpoint = item.type === "folder" ? "folders" : "bookmarks";
       const response = await fetch(`/api/${endpoint}/${item.id}`, {
         method: "DELETE",
       });
 
       let errorMessage = `Delete ${item.type === "folder" ? "folder" : "bookmark"} failed`;
-      
+
       if (!response.ok) {
         try {
           const data = await response.json();
@@ -300,11 +296,14 @@ function TableActions({ item, onUpdate }: { item: TableItem; onUpdate: () => voi
         throw new Error(errorMessage);
       }
 
+      toast.success(`${item.type === "folder" ? "文件夹" : "书签"}已删除`);
       onUpdate();
       setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error("Delete failed:", error);
-      alert(`Delete failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(error instanceof Error ? error.message : "删除失败，请重试");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -366,8 +365,10 @@ function TableActions({ item, onUpdate }: { item: TableItem; onUpdate: () => voi
             <Button
               variant="destructive"
               onClick={handleDelete}
+              disabled={isDeleting}
             >
-              Delete
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isDeleting ? "删除中..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

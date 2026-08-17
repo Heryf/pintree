@@ -19,51 +19,29 @@ export async function GET(request: Request) {
       }
     });
 
-    // Return data structure:
-    // An array of collection objects with the following properties:
-    // {
-    //   id: string,           // Unique identifier of the collection
-    //   name: string,         // Name of the collection
-    //   description?: string, // Optional description of the collection
-    //   icon?: string,        // Optional icon for the collection
-    //   isPublic: boolean,    // Indicates if the collection is publicly visible
-    //   viewStyle: string,    // Display style of the collection
-    //   sortStyle: string,    // Sorting method for items in the collection
-    //   sortOrder: number,    // Numerical order for sorting collections
-    //   slug: string,         // URL-friendly name of the collection
-    //   totalBookmarks: number // Total number of bookmarks in the collection
-    // }
-    const collectionsWithBookmarkCount = await Promise.all(
-      collections.map(async (collection) => {
-        const folders = await prisma.folder.findMany({
-          where: {
-            collectionId: collection.id
-          },
-          select: {
-            id: true
-          }
-        });
-
-        const folderIds = folders.map(folder => folder.id);
-
-        const totalBookmarks = await prisma.bookmark.count({
-          where: {
-            collectionId: collection.id,
-            OR: [
-              { folderId: null },
-              { folderId: { in: folderIds } }
-            ]
-          }
-        });
-
-        return {
-          ...collection,
-          totalBookmarks
-        };
-      })
+    // 使用 groupBy 一次性统计所有合集的书签数，替代原来的 N+1 循环查询
+    const bookmarkCounts = await prisma.bookmark.groupBy({
+      by: ['collectionId'],
+      _count: { _all: true },
+      where: publicOnly ? { collection: { isPublic: true } } : undefined,
+    });
+    const countMap = new Map(
+      bookmarkCounts.map((item) => [item.collectionId, item._count._all])
     );
 
-    return NextResponse.json(collectionsWithBookmarkCount);
+    const collectionsWithBookmarkCount = collections.map((collection) => ({
+      ...collection,
+      totalBookmarks: countMap.get(collection.id) ?? 0,
+    }));
+
+    // 公开数据允许浏览器/CDN 短时缓存；管理端数据始终实时
+    const cacheControl = publicOnly
+      ? 'public, max-age=60, s-maxage=120, stale-while-revalidate=600'
+      : 'no-store';
+
+    return NextResponse.json(collectionsWithBookmarkCount, {
+      headers: { 'Cache-Control': cacheControl },
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Failed to get bookmark collections" }, { status: 500 });

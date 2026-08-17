@@ -75,9 +75,10 @@ export function Header({
               variant="outline" 
               size="sm"
               onClick={() => setDialogOpen(true)}
+              aria-label="新建书签"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              新建书签
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">新建书签</span>
             </Button>
           </>
         )}

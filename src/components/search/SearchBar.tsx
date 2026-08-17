@@ -115,6 +115,21 @@ export function SearchBar({
     "360AI搜索": "https://www.sou.com/?q="
   };
 
+  // 保存最新的 onSearch 引用，避免防抖 effect 因回调引用变化而反复重置
+  const onSearchRef = useRef(onSearch);
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  });
+
+  // 搜索防抖：仅书签引擎生效，输入停止 350ms 后自动搜索，减少无效请求
+  useEffect(() => {
+    if (currentEngine !== "书签") return;
+    const timer = setTimeout(() => {
+      onSearchRef.current?.(inputValue.trim(), currentCollection);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [inputValue, currentEngine, currentCollection]);
+
   useEffect(() => {
     if (currentEngine && currentEngine !== "书签") {
       setInputValue("");

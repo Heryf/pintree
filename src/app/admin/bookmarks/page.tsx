@@ -123,21 +123,12 @@ export default function BookmarksPage() {
         sortOrder,
         ...(currentFolderId ? { folderId: currentFolderId } : {})
       });
-      
-      console.log("Fetching bookmarks with params:", {
-        collectionId,
-        sortField,
-        sortOrder,
-        currentFolderId,
-        url: `/api/admin/collections/${collectionId}/bookmarks?${queryParams}`
-      });
 
       const response = await fetch(
         `/api/admin/collections/${collectionId}/bookmarks?${queryParams}`
       );
       const data = await response.json();
-      console.log("Received bookmarks data:", data);
-      
+
       // 确保设置正确的数据结构
       setBookmarks({
         currentBookmarks: data.currentBookmarks || [],
@@ -164,12 +155,10 @@ export default function BookmarksPage() {
   };
 
   const handleSortChange = async (field: "createdAt" | "updatedAt", order: "asc" | "desc") => {
-    console.log("handleSortChange called with:", { field, order });
     setSortField(field);
     setSortOrder(order);
     
     if (selectedCollectionId) {
-      console.log("Fetching bookmarks with new sort:", { field, order, selectedCollectionId });
       await fetchBookmarks(selectedCollectionId);
     }
   };

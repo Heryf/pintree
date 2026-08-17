@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { revalidatePath } from 'next/cache';
 
 
 export const runtime = 'nodejs';
@@ -52,32 +53,32 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
-    // console.log('接收到的数据:', data);
 
     try {
-      const updatedSettings = [];
+      // 批量更新：将原来的「逐条 findUnique + update」改为单个事务内的批量 updateMany
+      const entries = Object.entries(data).filter(
+        ([, value]) => value !== undefined && value !== null
+      );
 
-      for (const [key, value] of Object.entries(data)) {
-        const existingSetting = await prisma.siteSetting.findUnique({
-          where: { key }
-        });
-      
-        if (existingSetting) {
-          const updated = await prisma.siteSetting.update({
-            where: { key },
-            data: {
-              value: String(value)
-            }
-          });
-          updatedSettings.push(updated);
-        }
+      let updatedCount = 0;
+      if (entries.length > 0) {
+        const results = await prisma.$transaction(
+          entries.map(([key, value]) =>
+            prisma.siteSetting.updateMany({
+              where: { key },
+              data: { value: String(value) },
+            })
+          )
+        );
+        updatedCount = results.reduce((sum, r) => sum + r.count, 0);
       }
 
-
+      // 设置变更后使整站缓存失效，保证 ISR/元数据尽快刷新
+      revalidatePath('/', 'layout');
 
       return NextResponse.json({ 
         message: 'Settings saved',
-        results: updatedSettings
+        updatedCount,
       });
     } catch (dbError) {
       console.error('Database operation failed:', dbError);

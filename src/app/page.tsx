@@ -11,8 +11,31 @@ import { Footer } from "@/components/website/footer";
 
 import { GetStarted } from "@/components/website/get-started";
 import { BackToTop } from "@/components/website/back-to-top";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { Collection } from "@prisma/client";
+
+/** 首屏加载骨架屏：模拟侧边栏 + 搜索栏 + 卡片网格，避免白屏/转圈 */
+function HomeSkeleton() {
+  return (
+    <div className="flex min-h-screen">
+      <div className="hidden w-64 shrink-0 flex-col gap-3 border-r border-border/40 bg-sidebar p-3 md:flex">
+        <Skeleton className="h-10 w-full rounded-lg" />
+        {[...Array(5)].map((_, i) => (
+          <Skeleton key={i} className="h-9 w-full rounded-lg" />
+        ))}
+      </div>
+      <div className="flex flex-1 flex-col space-y-8 px-4 sm:px-8 py-6">
+        <Skeleton className="h-12 w-full max-w-[600px] rounded-full" />
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          {[...Array(12)].map((_, i) => (
+            <Skeleton key={i} className="h-[110px] rounded-xl" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function SearchParamsComponent() {
   const pathname = usePathname();
@@ -106,9 +129,7 @@ function SearchParamsComponent() {
         <SidebarProvider>
           {
           isLoading && !collections.length ? (
-            <div className="flex flex-1 items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            </div>
+            <HomeSkeleton />
           ) : 
           selectedCollectionId || collectionSlug ? (
             <>

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import pLimit from "p-limit";
 import { ExportedFolder } from "../../[id]/export/route";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -10,6 +12,12 @@ export async function POST(
   request: Request
 ) {
   try {
+    // 权限校验：只有登录管理员才能恢复数据
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { name, description, folders, collectionId, folderMap } =
       await request.json();
 
