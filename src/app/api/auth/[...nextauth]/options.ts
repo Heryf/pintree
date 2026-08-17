@@ -2,6 +2,13 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { DefaultSession } from "next-auth";
 
+// 生产环境缺少 NEXTAUTH_SECRET 时给出明确提示（Vercel 日志中可见）
+if (process.env.NODE_ENV === "production" && !process.env.NEXTAUTH_SECRET) {
+  console.error(
+    "[Pintree] 缺少 NEXTAUTH_SECRET！请在 Vercel 项目 Settings → Environment Variables 中添加：NEXTAUTH_SECRET=$(openssl rand -base64 32)。未配置时 next-auth 会报 NO_SECRET，登录/会话接口返回 500。"
+  );
+}
+
 // 扩展 Session 类型
 declare module "next-auth" {
   interface Session {
