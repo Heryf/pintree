@@ -209,10 +209,11 @@ export function SearchBar({
     }
   };
 
-  const { settings, loading } = useSettings('feature');
+  const { settings } = useSettings('feature');
 
-  // 如果正在加载或搜索功能被禁用，直接返回 null
-  if (loading || settings?.enableSearch === 'false' || !settings?.enableSearch) {
+  // 仅当后台明确禁用搜索时才隐藏；
+  // 设置加载中或加载失败时保持搜索栏可用（避免设置接口异常导致搜索栏消失）
+  if (settings?.enableSearch === 'false') {
     return null;
   }
 

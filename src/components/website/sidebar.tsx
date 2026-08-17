@@ -56,6 +56,7 @@ export function WebsiteSidebar({
   const [expandedCollections, setExpandedCollections] = useState<Set<string>>(new Set());
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [foldersLoading, setFoldersLoading] = useState(false);
 
   const { images, isLoading } = useSettingImages("logoUrl");
   const { settings } = useSettings("basic");
@@ -99,27 +100,43 @@ export function WebsiteSidebar({
   // 获取所有合集的文件夹（用于左侧树形展示）
   useEffect(() => {
     const fetchAllFolders = async () => {
+      if (collections.length === 0) return;
+
+      setFoldersLoading(true);
       const newCollectionFolders = new Map<string, any[]>();
       const newCollectionFolderTrees = new Map<string, FolderNode[]>();
 
-      for (const collection of collections) {
-        try {
-          const response = await fetch(`/api/collections/${collection.id}/folders?all=true`);
-          const data = await response.json();
-          newCollectionFolders.set(collection.id, data);
-          newCollectionFolderTrees.set(collection.id, buildFolderTree(data));
-        } catch (error) {
-          console.error(`Get folders for collection ${collection.id} failed:`, error);
-        }
-      }
+      // 并行获取所有合集的文件夹（原实现串行等待，首次打开时目录树迟迟不可用，
+      // 表现为“必须先点击主内容区文件夹后侧边栏才能展开”）
+      await Promise.all(
+        collections.map(async (collection) => {
+          try {
+            const response = await fetch(`/api/collections/${collection.id}/folders?all=true`);
+            if (!response.ok) return;
+            const data = await response.json();
+            newCollectionFolders.set(collection.id, data);
+            newCollectionFolderTrees.set(collection.id, buildFolderTree(data));
+          } catch (error) {
+            console.error(`Get folders for collection ${collection.id} failed:`, error);
+          }
+        })
+      );
 
       setCollectionFolders(newCollectionFolders);
       setCollectionFolderTrees(newCollectionFolderTrees);
+
+      // 目录树就绪后，自动展开当前选中合集，保证首次打开即可看到其下级文件夹
+      if (selectedCollectionId) {
+        setExpandedCollections((prev) => {
+          const next = new Set(prev);
+          next.add(selectedCollectionId);
+          return next;
+        });
+      }
+      setFoldersLoading(false);
     };
 
-    if (collections.length > 0) {
-      fetchAllFolders();
-    }
+    fetchAllFolders();
   }, [collections]);
 
   // 当选中合集变化时，自动展开该合集
@@ -369,6 +386,7 @@ export function WebsiteSidebar({
                       alt="Logo"
                       width={32}
                       height={32}
+                      priority
                       className="rounded-lg object-contain"
                     />
                   )}
@@ -454,13 +472,21 @@ export function WebsiteSidebar({
                     <div
                       className={cn(
                         "overflow-hidden transition-all duration-300 ease-out",
-                        isExpanded && folderTree.length > 0
+                        isExpanded && (folderTree.length > 0 || foldersLoading)
                           ? "max-h-[2000px] opacity-100"
                           : "max-h-0 opacity-0"
                       )}
                     >
                       <div className="pt-0.5">
-                        {renderFolderTree(folderTree, collection.id)}
+                        {foldersLoading && folderTree.length === 0 ? (
+                          <div className="space-y-1.5 py-1 pl-6">
+                            {[...Array(3)].map((_, i) => (
+                              <Skeleton key={i} className="h-6 w-full rounded-md" />
+                            ))}
+                          </div>
+                        ) : (
+                          renderFolderTree(folderTree, collection.id)
+                        )}
                       </div>
                     </div>
                   </div>

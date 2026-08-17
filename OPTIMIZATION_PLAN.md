@@ -6,6 +6,42 @@
 
 ---
 
+## 三轮修改（部署反馈修复：异常、侧边栏、Logo、搜索栏）
+
+### R3-1【高】服务器端异常进一步加固 — 已实施
+
+**结论**：本机已模拟 Vercel 的多种故障（`NEXTAUTH_SECRET`/`NEXTAUTH_URL` 缺失、数据库不可达/URL 非法、`PrismaClient` 构造异常），页面均优雅降级；并用临时抛错路由实测确认 **错误边界已生效**（500 响应携带 `error-*.js` 与 `global-error-*.js` chunk 及错误 digest，客户端水合后渲染友好错误页，替代裸 "Application error" 页面）。
+若线上仍出现该错误，根因在部署环境（数据库/环境变量/数据），定位方法见 R2-1「从 Vercel 日志定位根因」。
+
+**修改**：
+- `src/lib/prisma.ts`：显式传入 `datasourceUrl`（缺省占位 URL + 5s 连接超时），确保任何环境变量缺失都不会在模块加载阶段抛错导致全站崩溃。
+- `src/app/error.tsx` / `src/app/global-error.tsx`：保留错误边界（R2 已新增），错误页显示错误码并支持重试。
+
+### R3-2【高】侧边栏首次打开即可展开下级文件夹 — 已实施
+
+**根因**：侧边栏获取各合集文件夹树的逻辑为**串行 `for...of` 逐个请求**，首次打开时目录树数据迟迟未就绪，表现为「必须先点击主内容区文件夹后侧边栏才能展开」。
+
+**修改**：`src/components/website/sidebar.tsx`
+- 改为 `Promise.all` **并行**获取所有合集的文件夹树；
+- 新增 `foldersLoading` 状态，目录树未就绪时在展开区域显示骨架屏；
+- 目录树就绪后**自动展开当前选中合集**，首次打开即可看到下级文件夹。
+
+### R3-3【中】Logo 加载提速 — 已实施
+
+**修改**：
+- `src/app/api/images/[id]/route.ts`：新增基于 `updatedAt` 的 **ETag**（未变更时返回 304）+ `Cache-Control: public, max-age=3600, stale-while-revalidate=86400`，Logo/背景图等 DB 图片不再重复传输（已验证 304 命中）。
+- `src/components/website/sidebar.tsx`：Logo `Image` 增加 `priority`（首屏 LCP 预加载）。
+
+### R3-4【高】恢复首页搜索栏 — 已实施
+
+**根因**：上一轮将搜索栏改为 `next/dynamic({ ssr: false })` 按需加载，在部分部署环境下导致搜索栏不渲染；且 `SearchBar` 在设置加载失败时会因 `!settings?.enableSearch` 直接返回 `null`。
+
+**修改**：
+- `src/components/bookmark/BookmarkGrid.tsx`：搜索栏**改回静态导入**（保证一定渲染）。
+- `src/components/search/SearchBar.tsx`：仅当后台**明确禁用**搜索（`enableSearch === 'false'`）时才隐藏；加载中/加载失败保持可用。
+
+---
+
 ## 二轮修改（2024 部署反馈修复）
 
 ### R2-1【高】服务器端异常（Application error）处理 — 已实施

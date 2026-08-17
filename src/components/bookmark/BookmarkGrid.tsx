@@ -1,23 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import dynamic from "next/dynamic";
 import { BookmarkCard } from "./BookmarkCard";
 import { FolderCard } from "./FolderCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { SearchBar } from "@/components/search/SearchBar";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-
-// 代码分割：搜索栏（含多引擎 SVG）按需加载，降低首屏 JS 体积
-const SearchBar = dynamic(
-  () => import("@/components/search/SearchBar").then((m) => m.SearchBar),
-  {
-    ssr: false,
-    loading: () => <Skeleton className="h-12 w-full max-w-[600px] rounded-full" />,
-  }
-);
 
 interface BookmarkGridProps {
   collectionId: string;
