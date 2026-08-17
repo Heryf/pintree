@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { canAccessCollection } from "@/lib/auth/utils";
 
 export async function GET(
   request: Request,
@@ -8,6 +9,11 @@ export async function GET(
   try {
     // 等待参数解析
     const { id, folderId } = await Promise.resolve(params);
+
+    // 私有合集仅登录管理员可访问（匿名返回 404，隐藏存在性）
+    if (!(await canAccessCollection(id))) {
+      return NextResponse.json({ error: "Collection not found" }, { status: 404 });
+    }
     
     // 验证参数
     if (!id || !folderId) {

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { canAccessCollection } from "@/lib/auth/utils";
 
 // 一次性返回合集中所有文件夹和书签，供单页平铺布局使用
 export async function GET(
@@ -8,6 +9,11 @@ export async function GET(
 ) {
   const { id } = await Promise.resolve(params);
   try {
+    // 私有合集仅登录管理员可访问（匿名返回 404，隐藏存在性）
+    if (!(await canAccessCollection(id))) {
+      return NextResponse.json({ error: "Collection not found" }, { status: 404 });
+    }
+
     // 并行获取所有文件夹和所有书签
     const [folders, bookmarks] = await Promise.all([
       prisma.folder.findMany({

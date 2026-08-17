@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { prisma } from "@/lib/prisma";
 
 /**
  * 安全的会话读取：next-auth v4 在令牌校验失败时（如 NEXTAUTH_SECRET 变更、
@@ -25,4 +26,25 @@ export async function requireAuth() {
   }
 
   return session;
+}
+
+/**
+ * 合集内容访问控制：
+ * - 公开合集：任何人可访问；
+ * - 非公开合集：仅登录管理员可访问（返回 false，调用方应返回 404 隐藏存在性）。
+ * 防止私有合集的书签/文件夹通过直连 API 被匿名读取。
+ */
+export async function canAccessCollection(collectionId: string): Promise<boolean> {
+  try {
+    const collection = await prisma.collection.findUnique({
+      where: { id: collectionId },
+      select: { isPublic: true },
+    });
+    if (!collection) return false;
+    if (collection.isPublic) return true;
+    return !!(await getSessionSafe());
+  } catch (error) {
+    console.error("Failed to check collection access:", error);
+    return false;
+  }
 }

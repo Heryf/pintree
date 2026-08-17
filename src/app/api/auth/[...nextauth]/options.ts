@@ -27,6 +27,13 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 60 * 60 * 24 * 7, // 会话有效期 7 天
   },
+  // 错误与登录页都指向站内页面：不再展示 next-auth 默认的
+  // "Server error / There is a problem with the server configuration" 页面，
+  // 而是跳转到 /login?error=<错误码>，由登录页给出明确中文提示。
+  pages: {
+    signIn: "/login",
+    error: "/login",
+  },
   providers: [
     CredentialsProvider({
       name: "Email Password",

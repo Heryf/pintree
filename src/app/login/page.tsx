@@ -1,21 +1,37 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/common/Input";
 import { Button } from "@/components/common/Button";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Github, Twitter } from "lucide-react";
 import Image from "next/image";
 import { revalidateData } from "@/actions/revalidate-data";
 
+// next-auth 错误码 → 中文提示
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  Configuration: "服务器认证配置异常：请检查 Vercel 环境变量 NEXTAUTH_SECRET 与 NEXTAUTH_URL 是否已正确配置",
+  CredentialsSignin: "账号或密码错误",
+  AccessDenied: "访问被拒绝",
+  Default: "登录失败，请重试",
+};
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [initializeDatabase, setInitializeDatabase] = useState(true);
+
+  // 读取 next-auth 跳转带来的 ?error= 参数（替代默认的英文错误页）
+  useEffect(() => {
+    const authError = searchParams.get("error");
+    if (authError) {
+      setError(AUTH_ERROR_MESSAGES[authError] || AUTH_ERROR_MESSAGES.Default);
+    }
+  }, [searchParams]);
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
@@ -33,19 +49,11 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        switch (result.error) {
-          case "Please enter email and password":
-            setError("Please enter email and password");
-            break;
-          case "User does not exist":
-            setError("User does not exist");
-            break;
-          case "Incorrect password":
-            setError("Incorrect password");
-            break;
-          default:
-            setError("Login failed, please try again");
-        }
+        // 统一使用错误码映射，给出明确中文提示
+        setError(
+          AUTH_ERROR_MESSAGES[result.error] ||
+          AUTH_ERROR_MESSAGES.Default
+        );
       } else {
         if (initializeDatabase) {
           try {
