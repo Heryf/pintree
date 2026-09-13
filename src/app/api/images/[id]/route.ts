@@ -28,7 +28,9 @@ export async function GET(
         'Content-Type': image.mimeType,
         'Content-Length': image.size.toString(),
         'ETag': etag,
-        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+        // no-cache：每次都向服务器验证 ETag，内容未变走 304，内容变化立即拿到新图。
+        // 避免 max-age 导致 Logo 上传后浏览器长时间使用本地旧缓存（原 2 分钟才刷新）。
+        'Cache-Control': 'no-cache',
       }
     })
   } catch (error) {

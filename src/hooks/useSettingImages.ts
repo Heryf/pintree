@@ -11,6 +11,9 @@ export const useSettingImages = (settingKey: string) => {
   const [imagesData, setImagesData] = useState<Image[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // 每次成功拉取后更新，作为 Image 组件 key 的一部分，强制浏览器在上传后重新发请求
+  // 解决 image.id 稳定（upsert 复用）→ URL 不变 → 浏览器 HTTP 缓存不失效的问题
+  const [fetchTime, setFetchTime] = useState(0);
 
   const fetchSettingImages = useCallback(async () => {
     try {
@@ -21,6 +24,7 @@ export const useSettingImages = (settingKey: string) => {
         const images = result.imageIds?.map((id: string) => ({ id, url: `/api/images/${id}` }));
         setImagesData(images || []);
         setError(null);
+        setFetchTime(Date.now());
       } else {
         setImagesData([]);
         setError(result.error || 'Get setting images failed');
@@ -49,6 +53,7 @@ export const useSettingImages = (settingKey: string) => {
     images: imagesData,
     isLoading,
     error,
-    reload
+    reload,
+    fetchTime
   };
 };
