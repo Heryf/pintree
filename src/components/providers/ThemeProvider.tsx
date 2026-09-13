@@ -30,13 +30,14 @@ const safeSetItem = (key: string, value: string) => {
 };
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
+  // 默认深色主题：首次访问未存储偏好时以 dark 为主，用户可手动切换为浅色
+  const [theme, setTheme] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     // head 内联脚本已同步设置 <html> 的 dark class，这里只需把 React state 对齐，
-    // 避免 useEffect 二次改 class 引发闪烁；隐私模式下 stored 为 null，按默认 light 兜底。
+    // 避免 useEffect 二次改 class 引发闪烁；隐私模式下 stored 为 null，按默认 dark 兜底。
     const stored = safeGetItem(STORAGE_KEY) as Theme;
     if (stored === "dark" || stored === "light") {
       setTheme(stored);

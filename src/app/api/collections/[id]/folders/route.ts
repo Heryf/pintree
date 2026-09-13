@@ -26,7 +26,13 @@ export async function GET(
       orderBy: { sortOrder: 'asc' }
     });
 
-    return NextResponse.json(folders);
+    return NextResponse.json(folders, {
+      headers: {
+        // 目录树数据变化不频繁，加 60s 浏览器缓存 + CDN 缓存 + stale-while-revalidate，
+        // 避免每次打开页面都重新查 DB，显著加快首屏目录树渲染
+        'Cache-Control': 'public, max-age=60, s-maxage=120, stale-while-revalidate=600',
+      },
+    });
   } catch (error) {
     console.error("Failed to get folders:", error);
     return NextResponse.json(

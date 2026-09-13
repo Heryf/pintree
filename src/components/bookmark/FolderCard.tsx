@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import { Folder } from "lucide-react";
 
 interface FolderCardProps {
@@ -18,6 +18,9 @@ export function FolderCard({
   onClick,
 }: FolderCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  // 用 useId 生成唯一前缀，避免多个 FolderCard 实例的 SVG <linearGradient>
+  // id 冲突导致第一个卡片 hover 时所有卡片渐变同步变化的 Bug
+  const uid = useId().replace(/:/g, "");
 
   // 格式化计数显示
   const getCountText = () => {
@@ -50,17 +53,17 @@ export function FolderCard({
         >
           <defs>
             {/* 文件夹主体渐变 */}
-            <linearGradient id="folderBody" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`${uid}folderBody`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={isHovered ? "#34d399" : "#6ee7b7"} />
               <stop offset="100%" stopColor={isHovered ? "#059669" : "#10b981"} />
             </linearGradient>
             {/* 文件夹盖子渐变 */}
-            <linearGradient id="folderTab" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`${uid}folderTab`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={isHovered ? "#4b5563" : "#6b7280"} />
               <stop offset="100%" stopColor={isHovered ? "#374151" : "#4b5563"} />
             </linearGradient>
             {/* 纸张阴影 */}
-            <filter id="paperShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <filter id={`${uid}paperShadow`} x="-20%" y="-20%" width="140%" height="140%">
               <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.1" />
             </filter>
           </defs>
@@ -72,7 +75,7 @@ export function FolderCard({
             width="116"
             height="64"
             rx="10"
-            fill="url(#folderBody)"
+            fill={`url(#${uid}folderBody)`}
             className="transition-all duration-300"
           />
 
@@ -82,14 +85,14 @@ export function FolderCard({
             y="28"
             width="116"
             height="14"
-            fill="url(#folderBody)"
+            fill={`url(#${uid}folderBody)`}
             className="transition-all duration-300"
           />
 
           {/* 文件夹 tab（标签页） */}
           <path
             d="M12 32 C12 25.37 17.37 20 24 20 L52 20 L62 12 L108 12 C114.63 12 120 17.37 120 24 L120 32 Z"
-            fill="url(#folderTab)"
+            fill={`url(#${uid}folderTab)`}
             className="transition-all duration-300"
           />
 
@@ -110,7 +113,7 @@ export function FolderCard({
             width="116"
             height="68"
             rx="10"
-            fill="url(#folderBody)"
+            fill={`url(#${uid}folderBody)`}
             opacity={isHovered ? "0.3" : "1"}
             className="transition-all duration-500 ease-out"
           />
@@ -121,7 +124,7 @@ export function FolderCard({
             y="24"
             width="116"
             height="14"
-            fill="url(#folderBody)"
+            fill={`url(#${uid}folderBody)`}
             opacity={isHovered ? "0.3" : "1"}
             className="transition-all duration-500 ease-out"
           />
@@ -187,7 +190,7 @@ export function FolderCard({
               rx="5"
               fill="white"
               opacity={isHovered ? "0.95" : "0"}
-              filter="url(#paperShadow)"
+              filter={`url(#${uid}paperShadow)`}
               className="transition-all duration-500 ease-out"
             />
 

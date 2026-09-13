@@ -101,10 +101,11 @@ export default async function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
-        {/* 预加载主题，避免暗色模式闪烁（FOUC） */}
+        {/* 预加载主题，避免暗色模式闪烁（FOUC）。
+            默认深色：无存储偏好时直接加 dark class，用户可手动切换为浅色。 */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("pintree-theme");if(t==="dark"||t==="light"){document.documentElement.classList.toggle("dark",t==="dark");}else if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches){document.documentElement.classList.add("dark");}}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem("pintree-theme");if(t==="dark"||t==="light"){document.documentElement.classList.toggle("dark",t==="dark");}else{document.documentElement.classList.add("dark");}}catch(e){document.documentElement.classList.add("dark");}})();`,
           }}
         />
         <meta name="color-scheme" content="light dark" />

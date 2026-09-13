@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from "@/lib/prisma";
+import { invalidateSettingImages } from "@/actions/get-setting-image";
 
 
 // 上传图片的函数
@@ -113,9 +114,9 @@ export async function updateSettingImage(formData: FormData) {
     });
   }
 
-  // 主动 revalidate 相关路径，让 sidebar 等前台组件立即看到新关联
-  // 注：revalidatePath 只能在服务端组件或 server action 顶层调用
-  // 这里通过返回 image id 让前端立即更新预览
+  // 清除 getSettingImages 的模块级缓存，让下次拉取拿到最新关联
+  invalidateSettingImages(settingKey);
+
   return {
     settingKey,
     success: true,
