@@ -38,10 +38,12 @@ export const generateMetadata = async (): Promise<Metadata> => {
       faviconUrl = faviconImage ? `${imageBaseUrl}${faviconImage.imageId}` : faviconUrl;
     }
 
-    // 系统标题优先取后台 SEO 设置的 siteTitle，回退 websiteName，最后用默认值
+    // 浏览器标签页标题：优先取用户在「基础设置 → 网站名称」实际填写的值（用户视角的"网站标题"）
+    // siteTitle（SEO 设置）作为 SEO 模板兜底；两者都未填时用默认值
+    // 之前优先取 siteTitle 导致用户在基础设置里填的网站名称被默认 siteTitle 盖过
     const siteTitle =
-      map.siteTitle ||
       map.websiteName ||
+      map.siteTitle ||
       "Pintree - Smart Bookmark Management & Organization Platform";
 
     return {
