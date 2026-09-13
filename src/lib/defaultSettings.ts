@@ -411,7 +411,7 @@ export const defaultSettings: SettingItem[] = [
   },
   {
     key: "sidebarAdsImageUrl",
-    value: "/assets/spaces-preview.png",
+    value: "/default-images/spaces-preview.png",
     type: "string",
     group: "feature",
     description: "侧边栏广告图片"
