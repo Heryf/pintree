@@ -378,22 +378,22 @@ export function WebsiteSidebar({
               >
                 <Link
                   href="/"
-                  className="pl-2 flex items-center gap-2.5 justify-start rounded-lg pr-0 w-full h-[44px]"
+                  className="flex items-center justify-center gap-3 rounded-lg w-full h-[64px] px-2"
                 >
                   {isLoading ? (
-                    <Skeleton className="w-8 h-8 rounded-lg" />
+                    <Skeleton className="w-12 h-12 rounded-lg" />
                   ) : (
                     <Image
                       src={images?.[0]?.url || "/logo.svg"}
                       alt="Logo"
-                      width={32}
-                      height={32}
+                      width={48}
+                      height={48}
                       priority
                       className="rounded-lg object-contain"
                     />
                   )}
                   {websiteName && (
-                    <span className="text-base font-bold text-foreground tracking-tight">
+                    <span className="text-lg font-bold text-foreground tracking-tight">
                       {websiteName}
                     </span>
                   )}

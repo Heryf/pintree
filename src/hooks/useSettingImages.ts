@@ -16,12 +16,9 @@ export const useSettingImages = (settingKey: string) => {
     try {
       const result = await getSettingImages(settingKey);
       if (result.success) {
-        // 每次拉取加版本参数，避免浏览器/Next.js Image 缓存导致上传后仍显示旧图
-        const version = Date.now();
-        const images = result.imageIds?.map((id: string) => ({
-          id,
-          url: `/api/images/${id}?v=${version}`
-        }));
+        // 用稳定 URL（不带时间戳），让 /api/images/[id] 的 ETag + Cache-Control 走 304
+        // 上传新图后 Image.id 不变（upsert 复用同一行），但 ETag 基于 updatedAt 会变 → 自动失效
+        const images = result.imageIds?.map((id: string) => ({ id, url: `/api/images/${id}` }));
         setImagesData(images || []);
         setError(null);
       } else {
@@ -41,7 +38,8 @@ export const useSettingImages = (settingKey: string) => {
     fetchSettingImages();
   }, [fetchSettingImages]);
 
-  // 暴露 reload：上传新图后调用，强制重新拉取，预览图立即更新
+  // 暴露 reload：上传新图后调用，强制重新拉取最新 image id 列表
+  // 注意：图片 id 在 upsert 模式下保持稳定，新内容的 ETag 会变，浏览器自然拿到新图
   const reload = useCallback(() => {
     setIsLoading(true);
     fetchSettingImages();
