@@ -115,7 +115,7 @@ export async function updateSettingImage(formData: FormData) {
   }
 
   // 清除 getSettingImages 的模块级缓存，让下次拉取拿到最新关联
-  invalidateSettingImages(settingKey);
+  await invalidateSettingImages(settingKey);
 
   return {
     settingKey,

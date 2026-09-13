@@ -10,7 +10,7 @@ const CACHE_TTL = 60_000; // 60 秒
 const imageCache = new Map<string, { ids: string[]; expiresAt: number }>();
 const inFlight = new Map<string, Promise<string[]>>();
 
-export function invalidateSettingImages(settingKey: string) {
+export async function invalidateSettingImages(settingKey: string) {
   imageCache.delete(settingKey);
 }
 
