@@ -27,6 +27,7 @@ export async function getSettingImages(settingKey: string) {
     }
 
     const promise = (async () => {
+      console.log('[getSettingImages] querying setting:', settingKey);
       const setting = await prisma.siteSetting.findUnique({
         where: { key: settingKey },
         include: {
@@ -37,12 +38,14 @@ export async function getSettingImages(settingKey: string) {
           }
         }
       });
+      console.log('[getSettingImages] query result:', setting ? `found (id=${setting.id}, images=${setting.images?.length || 0})` : 'not found');
 
       if (!setting) {
         throw new Error('Could not find the corresponding setting item');
       }
 
       const imageIds = setting.images.map(img => img.imageId);
+      console.log('[getSettingImages] imageIds:', imageIds);
       imageCache.set(settingKey, { ids: imageIds, expiresAt: Date.now() + CACHE_TTL });
       return imageIds;
     })();
@@ -55,10 +58,18 @@ export async function getSettingImages(settingKey: string) {
       inFlight.delete(settingKey);
     }
   } catch (error) {
-    console.error('Failed to get setting images:', error);
+    // 输出完整错误信息便于排查（Prisma 错误对象常为空 {}）
+    const errorInfo = {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : '',
+      name: error?.constructor?.name || 'Unknown',
+      keys: Object.keys(error || {}),
+      stringified: JSON.stringify(error, Object.getOwnPropertyNames(error || {}))
+    };
+    console.error('Failed to get setting images:', errorInfo);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to get setting images'
+      error: `${errorInfo.name}: ${errorInfo.message}`
     };
   }
 }
