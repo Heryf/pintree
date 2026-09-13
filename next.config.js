@@ -21,10 +21,12 @@ const nextConfig = {
     ],
     minimumCacheTTL: 86400,
     dangerouslyAllowSVG: true,
-    // 注意：unoptimized 会绕过 Next.js 图片优化器（按原图输出）。
-    // 若希望启用自动压缩/WebP/响应式裁剪，可改为 unoptimized: false（需保证 sharp 已安装，
-    // 且 remotePatterns 覆盖所有图标域名）；当前保持 true 以避免外部图标域名变化导致 500。
-    unoptimized: true,
+    // 启用 Next.js 图片优化器：
+    // 1. 服务端按需下载外部 favicon 并转 WebP（体积减小 50-80%），客户端下载更快
+    // 2. 优化器内部带缓存，同一图标只下载一次，后续请求直接走 CDN/缓存
+    // 3. 避免浏览器直连外部域名的逐个 DNS+TLS 握手导致的"一段一段加载"
+    // sharp 随 next 一起安装，无需额外配置
+    unoptimized: false,
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,

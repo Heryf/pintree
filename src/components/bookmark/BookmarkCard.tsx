@@ -1,6 +1,5 @@
 "use client";
 
-import Image from 'next/image'
 import { useState } from 'react'
 import { Folder, ExternalLink } from 'lucide-react'
 import { cn } from "@/lib/utils"
@@ -43,6 +42,7 @@ export function BookmarkCard({
   const [imageError, setImageError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const defaultIcon = '/assets/default-icon.svg'
+  const iconSrc = imageError || !icon ? defaultIcon : icon
 
   // 地址栏只显示域名（hostname），不附带任何路径
   // 例：https://szfilehelper.weixin.qq.com/path?a=1 → szfilehelper.weixin.qq.com
@@ -76,18 +76,25 @@ export function BookmarkCard({
       )}
     >
       <div className={cn("relative flex-shrink-0", compact ? "w-7 h-7 mr-2.5" : "w-9 h-9 mr-3.5")}>
-        <Image
-          src={imageError ? defaultIcon : (icon || defaultIcon)}
+        {/* 用原生 img 替代 next/image：
+            - favicon 多为 16-32px 小图，next/image 优化器反而增加一次服务端往返
+            - 直接加载外部图标，浏览器并发请求 + DNS 缓存复用，避免"一段一段加载"
+            - fetchpriority="high" 让首屏图标优先于图片优化器排队
+            - referrerPolicy="no-referrer" 避免向外站泄露本站路径 */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={iconSrc}
           alt={title}
-          fill
-          sizes={compact ? "28px" : "36px"}
+          width={compact ? 28 : 36}
+          height={compact ? 28 : 36}
           className="rounded-lg object-cover transition-transform duration-300"
           style={{
             transform: isHovered ? 'scale(1.08)' : 'scale(1)',
           }}
           onError={() => setImageError(true)}
-          loading="lazy"
+          loading="eager"
           decoding="async"
+          referrerPolicy="no-referrer"
         />
         {/* 图标悬停时显示外部链接指示 */}
         <div
