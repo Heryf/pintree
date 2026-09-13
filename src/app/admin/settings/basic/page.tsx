@@ -354,7 +354,7 @@ export default function BasicSettingsPage() {
 
 // 添加 Logo 上传组件
 function LogoUploader() {
-  const { images, isLoading, error, reload, fetchTime } = useSettingImages("logoUrl");
+  const { images, isLoading, reload } = useSettingImages("logoUrl");
   const [currentLogoUrl, setCurrentLogoUrl] = useState("");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -387,10 +387,8 @@ function LogoUploader() {
               alt="当前Logo"
               fill
               className="object-contain p-2"
-              // key 拼接 fetchTime：上传成功后父组件递增 imageReloadKey 触发本组件重挂载，
-              // useSettingImages 重新拉取并更新 fetchTime → key 变化 → Image 重挂载 → 浏览器重新请求
-              // 配合 /api/images/[id] 的 no-cache + ETag 验证，立即拿到新 Logo
-              key={`${images?.[0]?.url || "default"}-${fetchTime}`}
+              // url 自带 ?v= 版本参数，每次拉取都变化 → key 变化 → Image 重挂载 → 浏览器重新请求
+              key={images?.[0]?.url || "default"}
             />
           )}
         </div>
@@ -410,7 +408,7 @@ function LogoUploader() {
 };
 
 function FaviconUploader() {
-  const { images, isLoading, error, reload, fetchTime } = useSettingImages("faviconUrl");
+  const { images, isLoading, reload } = useSettingImages("faviconUrl");
   const [currentFaviconUrl, setCurrentFaviconUrl] = useState("");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -443,7 +441,7 @@ function FaviconUploader() {
               alt="当前图标"
               fill
               className="object-contain p-1"
-              key={`${images?.[0]?.url || "default"}-${fetchTime}`}
+              key={images?.[0]?.url || "default"}
             />
           </div>
         )}

@@ -19,12 +19,15 @@ export const useSettingImages = (settingKey: string) => {
     try {
       const result = await getSettingImages(settingKey);
       if (result.success) {
-        // 用稳定 URL（不带时间戳），让 /api/images/[id] 的 ETag + Cache-Control 走 304
-        // 上传新图后 Image.id 不变（upsert 复用同一行），但 ETag 基于 updatedAt 会变 → 自动失效
-        const images = result.imageIds?.map((id: string) => ({ id, url: `/api/images/${id}` }));
+        // 版本参数绕过浏览器已缓存的旧响应：
+        // upsert 复用同一行 → image.id 不变 → URL 不变 → 浏览器用旧 max-age 缓存（不重新请求）。
+        // 加 ?v= 版本参数让每次成功拉取后 URL 变化，浏览器必然重新请求。
+        // /api/images/[id] 忽略 query，仍按 id 返回正确图片，配合 no-cache+ETag 未变走 304。
+        const version = Date.now();
+        const images = result.imageIds?.map((id: string) => ({ id, url: `/api/images/${id}?v=${version}` }));
         setImagesData(images || []);
         setError(null);
-        setFetchTime(Date.now());
+        setFetchTime(version);
       } else {
         setImagesData([]);
         setError(result.error || 'Get setting images failed');
