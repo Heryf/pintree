@@ -40,6 +40,8 @@ export default function BasicSettingsPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"basicInfo" |"statistics" | "footerSettings" | "socialMedia">("basicInfo");
   const [loading, setLoading] = useState(false);
+  // 上传图片成功后递增，强制 LogoUploader/FaviconUploader 重新挂载并拉取最新图片
+  const [imageReloadKey, setImageReloadKey] = useState(0);
   const [settings, setSettings] = useState({
     websiteName: "",
     logoUrl: "",
@@ -189,7 +191,16 @@ export default function BasicSettingsPage() {
   
       // 并行处理所有操作
       await Promise.all(saveSettingPromises);
-  
+
+      // 若上传了 Logo/Favicon，递增 key 触发内层组件重新挂载拉取最新图
+      if (activeTab === "basicInfo") {
+        const logoInput = document.getElementById('logoUrl') as HTMLInputElement | null;
+        const faviconInput = document.getElementById('faviconUrl') as HTMLInputElement | null;
+        if ((logoInput?.files?.length ?? 0) > 0 || (faviconInput?.files?.length ?? 0) > 0) {
+          setImageReloadKey((k) => k + 1);
+        }
+      }
+
       toast.success(`设置已保存`);
 
       revalidateData();
@@ -243,12 +254,12 @@ export default function BasicSettingsPage() {
 
                     <div className="grid gap-2">
                       <Label>网站Logo</Label>
-                      <LogoUploader />
+                      <LogoUploader key={`logo-${imageReloadKey}`} />
                     </div>
 
                     <div className="grid gap-2">
                       <Label>网站图标</Label>
-                      <FaviconUploader />
+                      <FaviconUploader key={`favicon-${imageReloadKey}`} />
                     </div>
                   </CardContent>
                 </Card>
@@ -333,7 +344,7 @@ export default function BasicSettingsPage() {
 
 // 添加 Logo 上传组件
 function LogoUploader() {
-  const { images, isLoading, error } = useSettingImages("logoUrl");
+  const { images, isLoading, error, reload } = useSettingImages("logoUrl");
   const [currentLogoUrl, setCurrentLogoUrl] = useState("");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -366,6 +377,8 @@ function LogoUploader() {
               alt="当前Logo"
               fill
               className="object-contain p-2"
+              // 父组件 useState 变化时强制刷新（上传成功后 reload 拉到新 url）
+              key={images?.[0]?.url || "default"}
             />
           )}
         </div>
@@ -385,7 +398,7 @@ function LogoUploader() {
 };
 
 function FaviconUploader() {
-  const { images, isLoading, error } = useSettingImages("faviconUrl");
+  const { images, isLoading, error, reload } = useSettingImages("faviconUrl");
   const [currentFaviconUrl, setCurrentFaviconUrl] = useState("");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -418,6 +431,7 @@ function FaviconUploader() {
               alt="当前图标"
               fill
               className="object-contain p-1"
+              key={images?.[0]?.url || "default"}
             />
           </div>
         )}

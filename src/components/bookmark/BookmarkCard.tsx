@@ -46,12 +46,17 @@ export function BookmarkCard({
 
   // 地址栏只显示域名（hostname），不附带任何路径
   // 例：https://szfilehelper.weixin.qq.com/path?a=1 → szfilehelper.weixin.qq.com
+  // 兼容数据库里 url 字段未带协议的情况（如 "weixin.qq.com/path"）
   const cleanUrl = (() => {
     try {
-      return new URL(url).hostname
+      // URL 构造器要求完整协议，缺协议时补 https:// 再取 hostname
+      const withProtocol = /^https?:\/\//i.test(url) ? url : `https://${url}`
+      return new URL(withProtocol).hostname
     } catch {
-      // URL 非法时降级为旧逻辑（去协议去尾部斜杠），避免空白
-      return url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+      // 极端非法 URL：取第一个 / 之前的部分作为兜底
+      const cleaned = url.replace(/^https?:\/\//i, '')
+      const slashIdx = cleaned.indexOf('/')
+      return slashIdx > 0 ? cleaned.substring(0, slashIdx) : cleaned
     }
   })()
 

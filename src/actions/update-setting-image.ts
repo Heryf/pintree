@@ -16,18 +16,41 @@ async function uploadImage(file: File, existingImageId?: string) {
     try {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-  
-      // 只更新 Image 表，不动 SettingImage
-      const image = await prisma.image.upsert({
-        where: { id: existingImageId || '' },
-        update: {
-          name: file.name,
-          data: buffer,
-          mimeType: file.type,
-          size: file.size,
-          description: `Setting image: ${file.name}`
-        },
-        create: {
+
+      // 若有 existingImageId：upsert 复用同一行（保持 id 稳定，关联表无需动）
+      // 若无：create 新行，返回新 id（由调用方建关联）
+      if (existingImageId) {
+        const image = await prisma.image.upsert({
+          where: { id: existingImageId },
+          update: {
+            name: file.name,
+            data: buffer,
+            mimeType: file.type,
+            size: file.size,
+            description: `Setting image: ${file.name}`
+          },
+          create: {
+            id: existingImageId,
+            name: file.name,
+            data: buffer,
+            mimeType: file.type,
+            type: 'setting',
+            size: file.size,
+            description: `Setting image: ${file.name}`
+          },
+          select: {
+            id: true,
+            name: true,
+            mimeType: true,
+            size: true
+          }
+        });
+        return image;
+      }
+
+      // 首次上传：创建新 Image 记录
+      const image = await prisma.image.create({
+        data: {
           name: file.name,
           data: buffer,
           mimeType: file.type,
@@ -42,7 +65,6 @@ async function uploadImage(file: File, existingImageId?: string) {
           size: true
         }
       });
-  
       return image;
     } catch (error) {
       console.error('Failed to upload image:', error);
@@ -74,23 +96,24 @@ export async function updateSettingImage(formData: FormData) {
 
   const existingImageId = imageId || setting.images[0]?.imageId;
 
+  // 关键修复：首次上传时 existingImageId 为空，原代码直接抛错，导致 Logo 永远存不进 DB。
+  // 现在改为：无 existingImageId 时创建新 Image，并建立 SettingImage 关联记录。
+  const uploadedImage = await uploadImage(file, existingImageId || undefined);
+
+  // 若是首次上传（setting.images 为空），需要新建 SettingImage 关联记录
   if (!existingImageId) {
-    throw new Error(`Could not find the corresponding image: ${settingKey}`);
+    await prisma.settingImage.create({
+      data: {
+        settingId: setting.id,
+        imageId: uploadedImage.id,
+        description: `Setting image for ${settingKey}`
+      }
+    });
   }
 
-  // const validatedData = SettingImageSchema.parse({ 
-  //   settingKey, 
-  //   file, 
-  //   imageId: existingImageId 
-  // });
-
-  const uploadedImage = await uploadImage(file, existingImageId);
-
-
-
-  return { 
+  return {
     settingKey,
-    success: true, 
-    image: uploadedImage 
+    success: true,
+    image: uploadedImage
   };
 }
