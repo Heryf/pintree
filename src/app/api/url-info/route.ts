@@ -37,13 +37,21 @@ function isBlockedUrl(url: URL): boolean {
 
 async function checkUrl(url: string) {
   try {
-    const response = await fetch(url, {
-      method: 'HEAD',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
-    });
-    return response.ok;
+    // 5s 超时：目标站点挂死时及时释放函数资源（Vercel 函数默认 30s 上限）
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    try {
+      const response = await fetch(url, {
+        method: 'HEAD',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        },
+        signal: controller.signal,
+      });
+      return response.ok;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   } catch (error) {
     return false;
   }
@@ -167,14 +175,23 @@ export async function POST(request: Request) {
     const domain = parsedUrl.hostname;
 
     try {
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
-        },
-        redirect: 'follow',
-      });
+      // 8s 超时：主页面抓取超时及时中止，防止目标站点挂死拖垮函数
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+          },
+          redirect: 'follow',
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

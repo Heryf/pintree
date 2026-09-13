@@ -92,6 +92,13 @@
   }
 }
 
+/* 主题切换 View Transition：调整根元素交叉淡入淡出时长，与 toggle 切换同步（250ms 顺滑） */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 250ms;
+  animation-timing-function: ease;
+}
+
 /* 滚动条配色跟随应用主题（非系统主题） */
 .dark {
   scrollbar-color: hsl(220 15% 30%) transparent;

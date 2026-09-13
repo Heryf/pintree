@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     const session = await getSessionSafe();
     const { searchParams } = new URL(request.url);
     
-    const query = searchParams.get("q");
+    const query = (searchParams.get("q") || "").trim();
     const scope = searchParams.get("scope") || "all";
     const collectionId = searchParams.get("collectionId");
     const page = parseInt(searchParams.get("page") || "1");

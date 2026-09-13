@@ -8,6 +8,7 @@ import { ChevronRight, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SearchBar } from "@/components/search/SearchBar";
+import { useSettings } from "@/hooks/use-settings";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 interface BookmarkGridProps {
@@ -67,7 +68,13 @@ export function BookmarkGrid({
   const [inputValue, setInputValue] = useState("");
   const [totalResults, setTotalResults] = useState(0);
   const [currentEngine, setCurrentEngine] = useState("书签");
-  const [enableSearch, setEnableSearch] = useState(true);
+  // 走 useSettings 缓存：与 SearchBar 共享同一份 group=feature 数据，
+  // 避免每次挂载都直接 fetch 一次（SearchBar 内部也调 useSettings，命中模块级缓存）
+  const { settings: featureSettings, loading: featureLoading } = useSettings("feature");
+  // 加载中保持搜索栏可用（与原默认值一致），避免出现"搜索栏闪现消失"的视觉抖动
+  const enableSearch = featureLoading
+    ? true
+    : featureSettings.enableSearch === "true" || featureSettings.enableSearch === true;
   // 搜索请求序号：丢弃过期响应，避免快速输入时旧结果覆盖新结果
   const searchSeqRef = useRef(0);
 
@@ -176,19 +183,6 @@ export function BookmarkGrid({
       performBookmarkSearch(inputValue, searchScope, newPage);
     }
   };
-
-  useEffect(() => {
-    const loadSearchSetting = async () => {
-      try {
-        const response = await fetch('/api/settings?group=feature');
-        const data = await response.json();
-        setEnableSearch(data.enableSearch === 'true' || data.enableSearch === true);
-      } catch (error) {
-        console.error('Load search settings failed:', error);
-      }
-    };
-    loadSearchSetting();
-  }, []);
 
   if (!collectionId) {
     return (

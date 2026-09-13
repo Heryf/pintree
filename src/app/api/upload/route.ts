@@ -18,6 +18,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "File not found" }, { status: 400 });
     }
 
+    // 文件大小限制：防止恶意上传大文件耗尽内存 / 触发 Vercel 函数内存上限
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: "文件大小超过 5MB 限制" }, { status: 413 });
+    }
+
     // 文件路径映射
     const pathMap: Record<string, string> = {
       logo: 'public/images/logo.png',
