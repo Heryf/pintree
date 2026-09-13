@@ -204,6 +204,16 @@ export default function BasicSettingsPage() {
       toast.success(`设置已保存`);
 
       revalidateData();
+
+      // 若上传了 Logo/Favicon，强制刷新整个页面路由树，让所有用到 useSettingImages
+      // 的组件（包括 LogoUploader 自身）重新挂载并拉取最新关联记录
+      if (activeTab === "basicInfo") {
+        const logoInput = document.getElementById('logoUrl') as HTMLInputElement | null;
+        const faviconInput = document.getElementById('faviconUrl') as HTMLInputElement | null;
+        if ((logoInput?.files?.length ?? 0) > 0 || (faviconInput?.files?.length ?? 0) > 0) {
+          router.refresh();
+        }
+      }
     } catch (error) {
       console.error("Save settings failed:", error);
       toast.error(error instanceof Error ? error.message : "保存设置失败");

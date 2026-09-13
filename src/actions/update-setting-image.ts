@@ -1,15 +1,7 @@
 'use server'
 
 import { prisma } from "@/lib/prisma";
-import { z } from 'zod';
 
-
-// 图片设置验证模式
-const SettingImageSchema = z.object({
-  settingKey: z.string().min(1, 'Setting key cannot be empty'),
-  file: z.instanceof(File),
-  imageId: z.string().optional()
-});
 
 // 上传图片的函数
 async function uploadImage(file: File, existingImageId?: string) {
@@ -101,9 +93,19 @@ export async function updateSettingImage(formData: FormData) {
   const uploadedImage = await uploadImage(file, existingImageId || undefined);
 
   // 若是首次上传（setting.images 为空），需要新建 SettingImage 关联记录
+  // 用 upsert 防止 unique 约束冲突（[settingId, imageId] 是 unique 的）
   if (!existingImageId) {
-    await prisma.settingImage.create({
-      data: {
+    await prisma.settingImage.upsert({
+      where: {
+        settingId_imageId: {
+          settingId: setting.id,
+          imageId: uploadedImage.id
+        }
+      },
+      update: {
+        description: `Setting image for ${settingKey}`
+      },
+      create: {
         settingId: setting.id,
         imageId: uploadedImage.id,
         description: `Setting image for ${settingKey}`
@@ -111,9 +113,13 @@ export async function updateSettingImage(formData: FormData) {
     });
   }
 
+  // 主动 revalidate 相关路径，让 sidebar 等前台组件立即看到新关联
+  // 注：revalidatePath 只能在服务端组件或 server action 顶层调用
+  // 这里通过返回 image id 让前端立即更新预览
   return {
     settingKey,
     success: true,
-    image: uploadedImage
+    image: uploadedImage,
+    imageId: uploadedImage.id
   };
 }
