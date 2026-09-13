@@ -60,9 +60,11 @@ export function WebsiteSidebar({
 
   const { images, isLoading } = useSettingImages("logoUrl");
   const { settings } = useSettings("basic");
-  const { settings: seoSettings } = useSettings("seo");
-  // 左上角仅保留 Logo + 后台配置的系统标题（siteTitle），回退 websiteName / 默认值
-  const websiteName = seoSettings?.siteTitle || settings?.websiteName || "PinTree";
+  // 左上角标题文字：只取用户在「基础设置 → 网站名称」实际填写的值。
+  // 不再回退 siteTitle（siteTitle 默认值是"Pintree - Smart Bookmark Management..."，
+  //   且 SEO 设置页未暴露输入框，会导致用户填的网站名称被默认值盖过）；
+  // 也不再用 "PinTree" 兜底——未填写时只显示 Logo 图片本身（用户上传的图通常已含 Logo + 文字设计）。
+  const websiteName = settings?.websiteName || "";
 
   // 获取书签集合列表
   useEffect(() => {
@@ -390,9 +392,11 @@ export function WebsiteSidebar({
                       className="rounded-lg object-contain"
                     />
                   )}
-                  <span className="text-base font-bold text-foreground tracking-tight">
-                    {websiteName}
-                  </span>
+                  {websiteName && (
+                    <span className="text-base font-bold text-foreground tracking-tight">
+                      {websiteName}
+                    </span>
+                  )}
                 </Link>
               </SidebarMenuButton>
             )}

@@ -44,8 +44,16 @@ export function BookmarkCard({
   const [isHovered, setIsHovered] = useState(false)
   const defaultIcon = '/assets/default-icon.svg'
 
-  // 清理 URL 显示，移除 http(s) 和尾部斜杠
-  const cleanUrl = url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+  // 地址栏只显示域名（hostname），不附带任何路径
+  // 例：https://szfilehelper.weixin.qq.com/path?a=1 → szfilehelper.weixin.qq.com
+  const cleanUrl = (() => {
+    try {
+      return new URL(url).hostname
+    } catch {
+      // URL 非法时降级为旧逻辑（去协议去尾部斜杠），避免空白
+      return url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    }
+  })()
 
   return (
     <div
